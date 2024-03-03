@@ -3,22 +3,43 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Centered SVG and Text</title>
+<title>Ghost Exchange</title>
 <style>
-  body, html {
-    height: 100%;
+  body, html {height: 100%;
     margin: 0;
+    padding: 0;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
     text-align: center;
-    background-color: #121212; /* Pleasant dark background */
-    color: #ecf0f1; /* Light text color for contrast */
+    background-color: #121212;
+    color: #c0c0c0;
+    font-family: 'Open Sans', sans-serif;
+    transition: all 0.2s ease-in-out;
   }
   svg {
     width: 200px; /* Adjust as needed */
     height: auto;
+  }
+  svg:hover {
+    transform: translateY(-5px);
+  }
+  p {
+    margin: 16px 0;
+    line-height: 1.6;
+    text-shadow: 1px 1px 8px rgba(255, 255, 255, 0.7);
+  }
+
+  .arrow {
+    font-size: 24px;
+    margin: 0px 0;
+  }
+
+  .scid {
+    font-family: 'Courier New', monospace;
+    margin-top: 10px;
+    color: #a9a9a9;
   }
 </style>
 </head>
@@ -64,8 +85,8 @@
 
 <p>We will work on this...<br>... Eventually</p>
 <p>Meanwhile</p>
-<p>&#x2193;</p> <!-- ASCII arrow down -->
-<p>SCID: 98582dcbfd5dfcd101278ca66ee23cb579fbfd67453bf25b5cae5e861d15f7bc</p>
+<p class="arrow">&#x2193;</p>
+<p class="scid">SCID: 98582dcbfd5dfcd101278ca66ee23cb579fbfd67453bf25b5cae5e861d15f7bc</p>
 
 </body>
 </html>
