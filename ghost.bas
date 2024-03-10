@@ -140,7 +140,7 @@ Function getOutputPrice(output_amount Uint64, input_reserve Uint64, output_reser
     10 IF input_reserve > 0 & output_reserve > 0 & output_reserve > output_amount THEN GOTO 30
     20 PANIC
     30 DIM numerator, denominator as Uint64
-    40 RETURN mult_div(input_reserve * 1000, output_amount, output_reserve - output_amount + 1)
+    40 RETURN mult_div(input_reserve * 1000, output_amount, (output_reserve - output_amount) * 997 + 1)
 End Function
 
 Function deroToAssetInput(dero_sold Uint64, min_assets Uint64, asset_address String) Uint64
