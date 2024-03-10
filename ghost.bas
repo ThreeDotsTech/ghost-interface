@@ -34,9 +34,10 @@ End Function
 // {min_liquidity} Minimum number of BOO sender will get if total BOO supply is greater than 0.
 // {min_liquidity} does nothing when total BOO supply is 0.
 Function AddLiquidity(asset_address String, min_liquidity Uint64) Uint64
-    01 DIM total_liquidity, dero_reserve, asset_reserve, asset_amount, liquidity_minted, dero_deposited, asset_deposited as Uint64
-    02 LET dero_deposited = DEROVALUE()
-    03 LET asset_deposited = ASSETVALUE(HEXDECODE(asset_address))
+    01 DIM total_liquidity, dero_reserve, asset_reserve, asset_amount, liquidity_minted, dero_deposited, asset_deposited, SYS_MAX_VALUE as Uint64
+    02 LET SYS_MAX_VALUE = 18446744073709551 // Uint64.Max/1000 to protect from infinite supply tokens
+    03 LET dero_deposited = DEROVALUE()
+    04 LET asset_deposited = ASSETVALUE(HEXDECODE(asset_address))
     10 IF (asset_deposited > 0 & dero_deposited > 0 ) THEN GOTO 30
     20 GOTO 666
     30 LET total_liquidity =  get_supply_per_asset(asset_address) 
@@ -45,28 +46,29 @@ Function AddLiquidity(asset_address String, min_liquidity Uint64) Uint64
         41 IF min_liquidity > 0 THEN GOTO 43
         42 GOTO 666  
         43 LET dero_reserve = get_dero_reserve_per_asset(asset_address) 
-        44 LET asset_reserve = get_asset_reserve(asset_address)     
-        45 mintFee(dero_reserve, asset_reserve, asset_address)
-        46 LET total_liquidity = get_supply_per_asset(asset_address) // Must be defined again since totalSupply can update in mintFee
-        47 LET asset_amount =   dero_deposited * asset_reserve / dero_reserve + 1
-        48 LET liquidity_minted = dero_deposited * total_liquidity / dero_reserve
-        49 IF asset_deposited >= asset_amount & liquidity_minted >= min_liquidity THEN GOTO 51
-        50 GOTO 666
-        51 increase_provider_liquidity_by(SIGNER(), liquidity_minted, asset_address) 
-        52 set_supply_per_asset(total_liquidity + liquidity_minted, asset_address)
-        53 IF asset_deposited == asset_amount THEN GOTO 55
+        44 LET asset_reserve = get_asset_reserve(asset_address)
+        45 IF will_addition_overflow(asset_reserve, asset_deposited) == 1 THEN GOTO 666
+        46 mintFee(dero_reserve, asset_reserve, asset_address)
+        47 LET total_liquidity = get_supply_per_asset(asset_address) // Must be defined again since totalSupply can update in mintFee
+        48 LET asset_amount =   mult_div(dero_deposited, asset_reserve , dero_reserve + 1)
+        49 LET liquidity_minted = mult_div(dero_deposited, total_liquidity, dero_reserve)
+        50 IF asset_deposited >= asset_amount & liquidity_minted >= min_liquidity & (asset_reserve + asset_deposited <= SYS_MAX_VALUE) THEN GOTO 52
+        51 GOTO 666
+        52 increase_provider_liquidity_by(SIGNER(), liquidity_minted, asset_address) 
+        53 set_supply_per_asset(total_liquidity + liquidity_minted, asset_address)
+        54 IF asset_deposited == asset_amount THEN GOTO 56
         // Return any reminding assets
-        54 SEND_ASSET_TO_ADDRESS(SIGNER(), asset_deposited - asset_amount, HEXDECODE(asset_address))
+        55 SEND_ASSET_TO_ADDRESS(SIGNER(), asset_deposited - asset_amount, HEXDECODE(asset_address))
         // Increase the dero reserve record for this asset
-        55 set_dero_reserve_per_asset(dero_reserve + dero_deposited, asset_address)
+        56 set_dero_reserve_per_asset(dero_reserve + dero_deposited, asset_address)
         // Increase the asset reserve record
-        56 set_asset_reserve(asset_reserve + asset_amount, asset_address)
-        57 STORE(asset_address+":kLast",  (dero_reserve + dero_deposited) * (asset_reserve + asset_amount))
+        57 set_asset_reserve(asset_reserve + asset_amount, asset_address)
+        58 STORE(asset_address+":kLast",  (dero_reserve + dero_deposited) * (asset_reserve + asset_amount))
         // Return gracefully
-        58 GOTO 70
+        59 GOTO 70
     // else
     // Creating pair  
-    60 IF dero_deposited >= 1000 THEN GOTO 62
+    60 IF dero_deposited >= 1000 & asset_deposited <= SYS_MAX_VALUE THEN GOTO 62
         61 GOTO 666
         // Initialize the asset reserve record for this asset
         62 set_asset_reserve(asset_deposited, asset_address)
@@ -98,8 +100,8 @@ Function RemoveLiquidity(amount Uint64, min_dero Uint64, min_assets Uint64, asse
     70  LET dero_reserve = get_dero_reserve_per_asset(asset_address)
     80  mintFee(dero_reserve, asset_reserve, asset_address)
     90  LET total_liquidity = get_supply_per_asset(asset_address) // Must be defined again since totalSupply can update in mintFee
-   100  LET dero_amount  = amount * dero_reserve  / total_liquidity
-   110  LET asset_amount = amount * asset_reserve / total_liquidity
+   100  LET dero_amount  = mult_div(amount, dero_reserve, total_liquidity)
+   110  LET asset_amount = mult_div(amount, asset_reserve, total_liquidity)
    120  IF dero_amount >= min_dero & asset_amount >= min_assets THEN GOTO 140
    130  GOTO 666
    140  decrease_provider_liquidity_by(SIGNER(), amount, asset_address)
@@ -119,13 +121,15 @@ End Function
 // {input_reserve} Amount of DERO or Assets (input type) in exchange reserves.
 // {output_reserve} Amount of DERO or Assets (output type) in exchange reserves.
 Function getInputPrice(input_amount Uint64, input_reserve Uint64, output_reserve Uint64) Uint64
-    10 IF input_reserve > 0 & output_reserve > 0 THEN GOTO 30
+    01 DIM SYS_MAX_VALUE as Uint64
+    02 LET SYS_MAX_VALUE = 18446744073709551
+    10 IF input_reserve > 0 & output_reserve > 0 & input_amount <= SYS_MAX_VALUE THEN GOTO 30
     20 PANIC
-    30 DIM input_amount_with_fee, numerator, denominator as Uint64
+    30 DIM input_amount_with_fee as Uint64
     40 LET input_amount_with_fee = input_amount * 997
-    50 LET numerator = input_amount_with_fee * output_reserve
-    60 LET denominator = (input_reserve * 1000) + input_amount_with_fee
-    70 RETURN numerator / denominator
+    50 IF will_addition_overflow(input_reserve * 1000, input_amount * 1000) == 0 THEN GOTO 70
+    60 PANIC // Infinite supply token attack
+    70 RETURN mult_div(input_amount_with_fee, output_reserve, (input_reserve * 1000) + input_amount_with_fee)
 End Function
 
 // Pricing function for converting between DERO & Assets.
@@ -133,12 +137,10 @@ End Function
 // {input_reserve} Amount of DERO or Assets (input type) in exchange reserves.
 // {output_reserve} Amount of DERO or Assets (output type) in exchange reserves.
 Function getOutputPrice(output_amount Uint64, input_reserve Uint64, output_reserve Uint64) Uint64
-    10 IF input_reserve > 0 & output_reserve > 0 THEN GOTO 30
+    10 IF input_reserve > 0 & output_reserve > 0 & output_reserve > output_amount THEN GOTO 30
     20 PANIC
     30 DIM numerator, denominator as Uint64
-    40 LET numerator = input_reserve * output_amount * 1000
-    50 LET denominator = (output_reserve - output_amount) * 997
-    60 RETURN numerator / denominator + 1
+    40 RETURN mult_div(input_reserve * 1000, output_amount, output_reserve - output_amount + 1)
 End Function
 
 Function deroToAssetInput(dero_sold Uint64, min_assets Uint64, asset_address String) Uint64
@@ -278,6 +280,30 @@ Function GetAssetToDeroOutputPrice(dero_bought Uint64, asset_address String) Uin
     30 RETURN getOutputPrice(dero_bought, get_asset_reserve(asset_address), get_dero_reserve_per_asset(asset_address))
 End Function
 
+Function mintFee(reserve0 Uint64, reserve1 Uint64, asset_address String) Uint64
+    10 DIM feeTo as String
+    11 DIM kLast as Uint64
+    20 LET feeTo = LOAD("feeTo") 
+    // Get the last k for the asset
+    30 LET kLast = LOAD(asset_address+":kLast")
+    40 IF kLast != 0 THEN GOTO 50
+        41 RETURN 0
+    50 DIM rootK, rootKLast as Uint64
+    60 LET rootK = sqrt(reserve0 * reserve1)
+    70 LET rootKLast = sqrt(kLast)
+    80 IF rootK > rootKLast THEN GOTO 90
+        81 RETURN 0
+    90 DIM numerator, denominator, supply, liquidity_minted as Uint64
+   100 LET supply = get_supply_per_asset(asset_address)
+   110 LET numerator = supply*(rootK-rootKLast)
+   120 LET denominator = rootK * 5 + rootKLast
+   130 LET liquidity_minted = numerator / denominator
+   140 IF liquidity_minted > 0 THEN GOTO 141 ELSE GOTO 150
+       141 increase_provider_liquidity_by(feeTo, liquidity_minted, asset_address)
+       142 set_supply_per_asset(supply + liquidity_minted, asset_address)
+   150 RETURN 0
+End Function
+
 // Helper functions 
 // Encapsulated to better understand what's happening and absctract BOO storage schema
 // from main code.
@@ -328,28 +354,75 @@ Function get_provider_liquidity(provider_address String, asset_address String) U
     10 RETURN LOAD(ADDRESS_STRING(provider_address)+":BOO:"+asset_address)
 End Function
 
-Function mintFee(reserve0 Uint64, reserve1 Uint64, asset_address String) Uint64
-    10 DIM feeTo as String
-    11 DIM kLast as Uint64
-    20 LET feeTo = LOAD("feeTo") 
-    // Get the last k for the asset
-    30 LET kLast = LOAD(asset_address+":kLast")
-    40 IF kLast != 0 THEN GOTO 50
-        41 RETURN 0
-    50 DIM rootK, rootKLast as Uint64
-    60 LET rootK = sqrt(reserve0 * reserve1)
-    70 LET rootKLast = sqrt(kLast)
-    80 IF rootK > rootKLast THEN GOTO 90
-        81 RETURN 0
-    90 DIM numerator, denominator, supply, liquidity_minted as Uint64
-   100 LET supply = get_supply_per_asset(asset_address)
-   110 LET numerator = supply*(rootK-rootKLast)
-   120 LET denominator = rootK * 5 + rootKLast
-   130 LET liquidity_minted = numerator / denominator
-   140 IF liquidity_minted > 0 THEN GOTO 141 ELSE GOTO 150
-       141 increase_provider_liquidity_by(feeTo, liquidity_minted, asset_address)
-       142 set_supply_per_asset(supply + liquidity_minted, asset_address)
-   150 RETURN 0
+Function will_addition_overflow(a Uint64, b Uint64) Uint64
+    10 IF (a > 18446744073709551615 - b) THEN GOTO 100
+    20 RETURN 0 // No overflow
+    100 RETURN 1 // Overflow
+End Function
+
+// From Pieswap
+// lossless (a * b ) / c
+Function mult_div(a Uint64, b Uint64, c Uint64) Uint64
+	10 DIM base, maxdiv AS Uint64
+	20 LET base = 4294967296	// (1<<32)
+	30 LET maxdiv = (base-1)*base + (base-1)
+
+	50 DIM res AS Uint64
+	60 LET res = (a/c) * b + (a%c) * (b/c)
+	70 LET a = a % c
+	80 LET b = b % c
+	90 IF (a == 0 || b == 0) THEN GOTO 1000
+
+	100 IF (c >= base) THEN GOTO 200
+	110 LET res = res + (a*b/c)
+	120 GOTO 1000
+
+	200 DIM norm AS Uint64
+	210 LET norm = maxdiv/c
+	220 LET c = c * norm
+	230 LET a = a * norm
+
+	300 DIM ah, al, bh, bl, ch, cl AS Uint64
+	310 LET ah = a / base
+	320 LET al = a % base
+	330 LET bh = b / base
+	340 LET bl = b % base
+	350 LET ch = c / base
+	360 LET cl = c % base
+
+	400 DIM p0, p1, p2 AS Uint64
+	410 LET p0 = al*bl
+	420 LET p1 = p0 / base + al*bh
+	430 LET p0 = p0 % base
+	440 LET p2 = p1 / base + ah*bh
+	450 LET p1 = (p1 % base) + ah*bl
+	460 LET p2 = p2 + p1 / base
+	470 LET p1 = p1 % base
+
+	500 DIM q0, q1, rhat AS Uint64
+	510 LET p2 = p2 % c
+	520 LET q1 = p2 / ch
+	530 LET rhat = p2 % ch
+
+	600 IF (q1 < base && (rhat >= base || q1*cl <= rhat*base+p1)) THEN GOTO 700
+	610 LET q1 = q1 - 1
+	620 LET rhat = rhat + ch
+	630 GOTO 600
+
+	700 LET p1 = ((p2 % base) * base + p1) - q1 * cl
+	710 LET p2 = (p2 / base * base + p1 / base) - q1 * ch
+	720 LET p1 = (p1 % base) + (p2 % base) * base
+	730 LET q0 = p1 / ch
+	740 LET rhat = p1 % ch
+
+	800 IF (q0 < base && (rhat >= base || q0*cl <= rhat*base+p0)) THEN GOTO 900
+	810 LET q0 = q0 - 1
+	820 LET rhat = rhat + ch
+	830 GOTO 800
+
+	900 LET res = res + q0 + q1 * base
+
+	1000 RETURN res
 End Function
     
 // babylonian method (https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Babylonian_method)
