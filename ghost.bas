@@ -9,7 +9,7 @@
 //  (oo)                   |RIP|
 //  /||\                   |___|
 //////////////////////////////////////
-// Ghost Exchange
+// Ghost Exchange v1.1
 // Use at your own risk
 // For more info visit: ghost.trading
 //////////////////////////////////////
