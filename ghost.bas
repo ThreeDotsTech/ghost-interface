@@ -5,9 +5,9 @@
 //         |    \
 //         '~~~~'
 //    ?
-//   /\                     ___
-//  (oo)                   |RIP|
-//  /||\                   |___|
+//   /\                ___
+//  (oo)              |RIP|
+//  /||\              |___|
 //////////////////////////////////////
 // Ghost Exchange v1.1
 // Use at your own risk
@@ -18,7 +18,7 @@ Function Initialize() Uint64
     10 STORE("owner", SIGNER())
     20 STORE("feeTo", SIGNER())
     30 STORE("nameHdr", "Ghost Exchange")
-    40 STORE("descrHdr", "Spooktacular trades await!") 
+    40 STORE("descrHdr", "Spooktacular trades!") 
     50  RETURN 0
 End Function 
 
