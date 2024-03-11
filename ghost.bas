@@ -139,7 +139,7 @@ End Function
 Function getOutputPrice(output_amount Uint64, input_reserve Uint64, output_reserve Uint64) Uint64
     10 IF input_reserve > 0 & output_reserve > 0 & output_reserve > output_amount THEN GOTO 30
     20 PANIC
-    30 DIM numerator, denominator as Uint64
+        30 DIM numerator, denominator as Uint64
     40 RETURN mult_div(input_reserve * 1000, output_amount, output_reserve - output_amount + 1)
 End Function
 
@@ -281,7 +281,8 @@ Function GetAssetToDeroOutputPrice(dero_bought Uint64, asset_address String) Uin
 End Function
 
 Function mintFee(reserve0 Uint64, reserve1 Uint64, asset_address String) 
-    10 DIM feeTo, rootKLast as String
+    10 DIM feeTo as String
+    11 DIM rootKLast as Uint64
     20 LET feeTo = LOAD("feeTo") 
     // Get the last root k for the asset
     30 LET rootKLast = LOAD(asset_address+":rootKLast")
@@ -291,7 +292,7 @@ Function mintFee(reserve0 Uint64, reserve1 Uint64, asset_address String)
     60 LET rootK = sqrt(reserve0) * sqrt(reserve1)
     70 IF rootK > rootKLast THEN GOTO 80
         71 RETURN 
-    80 DIM numerator, denominator, supply, liquidity_minted as Uint64
+    80 DIM supply, liquidity_minted as Uint64
     90 LET supply = get_supply_per_asset(asset_address)
    100 LET liquidity_minted = mult_div(supply, rootK - rootKLast, rootK * 5 + rootKLast)
    110 IF liquidity_minted > 0 THEN GOTO 111 ELSE GOTO 120
