@@ -160,6 +160,7 @@ End Function
 // Convert DERO to Assets.
 // User specifies exact input (DEROVALUE()).
 // User cannot specify minimum output.
+// {asset_address} Address of the asset to trade.
 Function DeroToAssetSwapInput(asset_address String) Uint64
     10 RETURN deroToAssetInput(DEROVALUE(), 1, asset_address)
 End Function
@@ -167,6 +168,7 @@ End Function
 // Convert DERO to Assets.
 // User specifies exact input (DEROVALUE()) & minimum output.
 // {min_assets} Minimum Assets bought.
+// {asset_address} Address of the asset to trade.
 Function DeroToAssetSwapInputMin(min_assets Uint64, asset_address String) Uint64
     10 RETURN deroToAssetInput(DEROVALUE(), min_assets, asset_address)
 End Function
@@ -192,6 +194,7 @@ End Function
 // Convert DERO to Assets.
 // User specifies maximum input (DEROVALUE()) & exact output.
 // {assets_bought} Amount of Assets bought.
+// {asset_address} Address of the asset to trade.
 Function DeroToAssetSwapOutput(assets_bought Uint64, asset_address String) Uint64
     10 RETURN deroToAssetOutput(assets_bought, DEROVALUE(), asset_address)
 End Function
@@ -213,6 +216,7 @@ End Function
 // Convert Assets to DERO.
 // User specifies exact input (ASSETVALUE(asset_address)) & minimum output.
 // {min_dero} Minimum DERO purchased.
+// {asset_address} Address of the asset to trade.
 Function AssetToDeroSwapInput(min_dero Uint64, asset_address String) Uint64
     10 RETURN assetToDeroInput(ASSETVALUE(HEXDECODE(asset_address)), min_dero, asset_address)
 End Function
@@ -239,12 +243,14 @@ End Function
 // Convert Assets to DERO.
 // User specifies maximum input (ASSETVALUE(asset_address)) & exact output.
 // {dero_bought} Amount of DERO purchased.
+// {asset_address} Address of the asset to trade.
 Function AssetToDeroSwapOutput(dero_bought Uint64, asset_address String) Uint64
     10 RETURN assetToDeroOutput(dero_bought, ASSETVALUE(HEXDECODE(asset_address)), asset_address)
 End Function
 
 // Public price function for DERO to Asset trades with an exact input.
 // {dero_sold} Amount of DERO sold.
+// {asset_address} Address of the asset to trade.
 // @returns Amount of Assets that can be bought with input DERO.
 Function GetDeroToAssetInputPrice(dero_sold Uint64, asset_address String) Uint64
     10 IF dero_sold > 0 THEN GOTO 30
@@ -254,6 +260,7 @@ End Function
 
 // Public price function for DERO to Asset trades with an exact output.
 // {assets_bought} Amount of Assets bought.
+// {asset_address} Address of the asset to trade.
 // @returns Amount of DERO needed to buy output Assets.
 Function GetDeroToAssetOutputPrice(assets_bought Uint64, asset_address String) Uint64
     10 IF assets_bought > 0 THEN GOTO 30
@@ -262,7 +269,8 @@ Function GetDeroToAssetOutputPrice(assets_bought Uint64, asset_address String) U
 End Function
 
 // Public price function for Asset to DERO trades with an exact input.
-// assets_sold Amount of Assets sold.
+// {assets_sold} Amount of Assets sold.
+// {asset_address} Address of the asset to trade.
 // @returns Amount of DERO that can be bought with input Assets.
 Function GetAssetToDeroInputPrice(assets_sold Uint64, asset_address String) Uint64
     10 IF assets_sold > 0 THEN GOTO 30
@@ -272,6 +280,7 @@ End Function
 
 // Public price function for Asset to DERO trades with an exact output.
 // {dero_bought} Amount of output DERO.
+// {asset_address} Address of the asset to trade.
 // @returns Amount of Assets needed to buy output DERO.
 Function GetAssetToDeroOutputPrice(dero_bought Uint64, asset_address String) Uint64
     10 IF dero_bought > 0 THEN GOTO 30
