@@ -63,7 +63,7 @@ Function AddLiquidity(asset_address String, min_liquidity Uint64) Uint64
         56 set_dero_reserve_per_asset(dero_reserve + dero_deposited, asset_address)
         // Increase the asset reserve record
         57 set_asset_reserve(asset_reserve + asset_amount, asset_address)
-        58 STORE(asset_address+":kLast",  (dero_reserve + dero_deposited) * (asset_reserve + asset_amount))
+        58 STORE(asset_address+":rootKLast",  sqrt(dero_reserve + dero_deposited) * sqrt(asset_reserve + asset_amount))
         // Return gracefully
         59 GOTO 70
     // else
@@ -77,7 +77,7 @@ Function AddLiquidity(asset_address String, min_liquidity Uint64) Uint64
         65 set_supply_per_asset(initial_liquidity, asset_address)
         // Initialize the dero reserve record for this asset
         66 set_dero_reserve_per_asset(dero_deposited, asset_address)
-        67 STORE(asset_address+":kLast", (asset_deposited) * (dero_deposited))
+        67 STORE(asset_address+":rootKLast", sqrt(asset_deposited) * sqrt(dero_deposited))
         68 increase_provider_liquidity_by(SIGNER(), initial_liquidity, asset_address)
     70 RETURN 0
 
@@ -108,7 +108,7 @@ Function RemoveLiquidity(amount Uint64, min_dero Uint64, min_assets Uint64, asse
    150  set_supply_per_asset(total_liquidity - amount, asset_address)
    160  set_dero_reserve_per_asset(dero_reserve - dero_amount, asset_address)
    170  set_asset_reserve(asset_reserve - asset_amount, asset_address)
-   180  STORE(asset_address+":kLast", (dero_reserve - dero_amount) * (asset_reserve - asset_amount) )
+   180  STORE(asset_address+":rootKLast", sqrt(dero_reserve - dero_amount) * sqrt(asset_reserve - asset_amount) )
    190  SEND_DERO_TO_ADDRESS(SIGNER(), dero_amount)
    200  SEND_ASSET_TO_ADDRESS(SIGNER(),asset_amount, HEXDECODE(asset_address))
    210  RETURN 0
@@ -280,28 +280,25 @@ Function GetAssetToDeroOutputPrice(dero_bought Uint64, asset_address String) Uin
     30 RETURN getOutputPrice(dero_bought, get_asset_reserve(asset_address), get_dero_reserve_per_asset(asset_address))
 End Function
 
-Function mintFee(reserve0 Uint64, reserve1 Uint64, asset_address String) Uint64
+Function mintFee(reserve0 Uint64, reserve1 Uint64, asset_address String) 
     10 DIM feeTo as String
-    11 DIM kLast as Uint64
+    11 DIM rootKLast as Uint64
     20 LET feeTo = LOAD("feeTo") 
-    // Get the last k for the asset
-    30 LET kLast = LOAD(asset_address+":kLast")
-    40 IF kLast != 0 THEN GOTO 50
-        41 RETURN 0
-    50 DIM rootK, rootKLast as Uint64
-    60 LET rootK = sqrt(reserve0 * reserve1)
-    70 LET rootKLast = sqrt(kLast)
-    80 IF rootK > rootKLast THEN GOTO 90
-        81 RETURN 0
-    90 DIM numerator, denominator, supply, liquidity_minted as Uint64
-   100 LET supply = get_supply_per_asset(asset_address)
-   110 LET numerator = supply*(rootK-rootKLast)
-   120 LET denominator = rootK * 5 + rootKLast
-   130 LET liquidity_minted = numerator / denominator
-   140 IF liquidity_minted > 0 THEN GOTO 141 ELSE GOTO 150
-       141 increase_provider_liquidity_by(feeTo, liquidity_minted, asset_address)
-       142 set_supply_per_asset(supply + liquidity_minted, asset_address)
-   150 RETURN 0
+    // Get the last root k for the asset
+    30 LET rootKLast = LOAD(asset_address+":rootKLast")
+    40 IF rootKLast != 0 THEN GOTO 50
+        41 RETURN 
+    50 DIM rootK as Uint64
+    60 LET rootK = sqrt(reserve0) * sqrt(reserve1)
+    70 IF rootK > rootKLast THEN GOTO 80
+        71 RETURN 
+    80 DIM supply, liquidity_minted as Uint64
+    90 LET supply = get_supply_per_asset(asset_address)
+   100 LET liquidity_minted = mult_div(supply, rootK - rootKLast, rootK * 5 + rootKLast)
+   110 IF liquidity_minted > 0 THEN GOTO 111 ELSE GOTO 120
+       111 increase_provider_liquidity_by(feeTo, liquidity_minted, asset_address)
+       112 set_supply_per_asset(supply + liquidity_minted, asset_address)
+   120 RETURN 
 End Function
 
 // Helper functions 
