@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="view20209" content="width=device-width, initial-scale=1.0">
 <title>Ghost Exchange</title>
 <style>
-  body, html {height: 100%;
-    margin: 0;
+  body, html {
+    height: 100%;
+    margin: 20px;
     padding: 0;
-    display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
@@ -19,16 +19,39 @@
     transition: all 0.2s ease-in-out;
   }
   svg {
-    width: 200px; /* Adjust as needed */
-    height: auto;
+  width: 200px; /* Adjust as needed */
+  height: auto;
+  animation: float 5s ease-in-out infinite;
+}
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
   }
-  svg:hover {
-    transform: translateY(-5px);
+  50% {
+    transform: translateY(-20px);
   }
+}
   p {
     margin: 16px 0;
     line-height: 1.6;
     text-shadow: 1px 1px 8px rgba(255, 255, 255, 0.7);
+  }
+
+  .special-note  {
+  background-color: rgba(255, 255, 255, 0.2); /* 20% translucidity */
+  color: rgb(189, 189, 189); 
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  font-size: 0.9em;
+  display: block; /* Ensures it's on its own line */
+  width: fit-content; /* Or max-content based on browser support */
+  margin-left: auto;
+  margin-right: auto; /* Centers the note */
+}
+
+  .special-note p {
+    margin: 0; /* Remove default paragraph margin */
   }
 
   .arrow {
@@ -81,12 +104,80 @@
         <path class="cls-1" d="m262.24,49.71l.17-1.3c.3.11.6.22.9.33-.36.32-.71.65-1.07.98Z"/>
         <path class="cls-1" d="m373.82,74.46c-.51,2.7-1.07,5.48-4.42,5.63-2.78.12-3.49-2.14-3.48-4.4.01-3.04,1.35-5.92,4.4-6.24,2.93-.31,2.96,2.84,3.5,5.01Z"/>
     </g>
-    </svg>
+</svg>
 
 <p>We will work on this...<br>... Eventually</p>
 <p>Meanwhile</p>
 <p class="arrow">&#x2193;</p>
-<p class="scid">SCID: 9bca33fc8c64e357b00e19e3fb6aec51d3b3bf8bafddd8538afac4df4bab5bda</p>
+<p class="scid">SCID: bb8714fefca6187c914872ff138fcf4bf883d2ba81dfa73ea19265a2012f3cd0</p>
+
+
+<div class="guide" style="background-color: #1c1c1c; color: #c0c0c0; padding: 20px; border-radius: 10px; font-family: 'Courier New', monospace; margin-top: 40px;">
+  <h2>How to Interact with Ghost Exchange</h2>
+  <p>Use the following curl commands to interact with the Ghost Exchange smart contract.</p>
+
+  <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(160, 160, 160, 0.75), rgba(0, 0, 0, 0));">
+
+  <h3>AddLiquidity</h3>
+  <p>Deposit assets and DERO at the current ratio to mint BOO tokens.</p>
+  <div class="special-note">
+    <p>  Note: The "destination" parameter requires a valid DERO address DIFFERENT FROM THE SENDER'S but, in this context, it serves solely to satisfy the command syntax. Rest assured, the DERO specified will be transferred to the Smart Contract, not the random address provided.
+    </p>
+  </div>
+  <code>
+    curl -X POST http://127.0.0.1:20209/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"transfer","params":{"scid":"bb8714fefca6187c914872ff138fcf4bf883d2ba81dfa73ea19265a2012f3cd0","ringsize":2,"sc_rpc":[{"name":"entrypoint","datatype":"S","value":"AddLiquidity"},{"name":"asset_address","datatype":"S","value":"ASSET_SCID_HERE"},{"name":"min_liquidity","datatype":"U","value":"MIN_LIQUIDITY_HERE"}],"transfers":[{"burn":"DERO_AMOUNT_HERE","destination":"RANDOM_DESTINATION_ADDRESS_HERE"},{"scid":"ASSET_SCID_HERE","burn":"ASSET_AMOUNT_HERE"}]}}' -H 'Content-Type: application/json'
+  </code>
+
+  <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(160, 160, 160, 0.75), rgba(0, 0, 0, 0));">
+
+  <h3>RemoveLiquidity</h3>
+  <p>Burn BOO tokens to withdraw DERO & assets at the current ratio.</p>
+  <code>
+    curl -X POST http://127.0.0.1:20209/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"scinvoke","params":{"scid":"bb8714fefca6187c914872ff138fcf4bf883d2ba81dfa73ea19265a2012f3cd0","ringsize":2,"sc_rpc":[{"name":"entrypoint","datatype":"S","value":"RemoveLiquidity"},{"name":"amount","datatype":"U","value":"AMOUNT_HERE"},{"name":"min_dero","datatype":"U","value":"MIN_DERO_HERE"},{"name":"min_assets","datatype":"U","value":"MIN_ASSETS_HERE"},{"name":"asset_address","datatype":"S","value":"ASSET_SCID_HERE"}]}}' -H 'Content-Type: application/json'
+  </code>
+
+  <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(160, 160, 160, 0.75), rgba(0, 0, 0, 0));">
+
+  <h3>DeroToAssetSwapInput</h3>
+  <p>Convert DERO to Assets, specifying exact input (DEROVALUE()).</p>
+  <code>
+    curl -X POST http://127.0.0.1:20209/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"scinvoke","params":{"sc_dero_deposit":"DERO_AMOUNT_HERE","scid":"bb8714fefca6187c914872ff138fcf4bf883d2ba81dfa73ea19265a2012f3cd0","ringsize":2,"sc_rpc":[{"name":"entrypoint","datatype":"S","value":"DeroToAssetSwapInput"},{"name":"asset_address","datatype":"S","value":"ASSET_SCID_HERE"}]}}' -H 'Content-Type: application/json'
+  </code>
+
+  <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(160, 160, 160, 0.75), rgba(0, 0, 0, 0));">
+
+  <h3>DeroToAssetSwapInputMin</h3>
+  <p>Convert DERO to Assets, specifying exact input (DEROVALUE()) and minimum output.</p>
+  <code>
+    curl -X POST http://127.0.0.1:20209/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"scinvoke","params":{"sc_dero_deposit":"DERO_AMOUNT_HERE","scid":"bb8714fefca6187c914872ff138fcf4bf883d2ba81dfa73ea19265a2012f3cd0","ringsize":2,"sc_rpc":[{"name":"entrypoint","datatype":"S","value":"DeroToAssetSwapInputMin"},{"name":"min_assets","datatype":"U","value":"MIN_ASSETS_HERE"},{"name":"asset_address","datatype":"S","value":"ASSET_SCID_HERE"}]}}' -H 'Content-Type: application/json'
+  </code>
+
+  <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(160, 160, 160, 0.75), rgba(0, 0, 0, 0));">
+
+  <h3>DeroToAssetSwapOutput</h3>
+  <p>Convert DERO to Assets, specifying maximum input (DEROVALUE()) and exact output.</p>
+  <code>
+    curl -X POST http://127.0.0.1:20209/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"scinvoke","params":{"sc_dero_deposit":"MAX_DERO_AMOUNT_HERE","scid":"bb8714fefca6187c914872ff138fcf4bf883d2ba81dfa73ea19265a2012f3cd0","ringsize":2,"sc_rpc":[{"name":"entrypoint","datatype":"S","value":"DeroToAssetSwapOutput"},{"name":"assets_bought","datatype":"U","value":"ASSETS_BOUGHT_HERE"},{"name":"asset_address","datatype":"S","value":"ASSET_SCID_HERE"}]}}' -H 'Content-Type: application/json'
+  </code>
+
+  <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(160, 160, 160, 0.75), rgba(0, 0, 0, 0));">
+
+  <h3>AssetToDeroSwapInput</h3>
+  <p>Convert Assets to DERO, specifying exact input (ASSET_VALUE()) and minimum output.</p>
+  <code>
+    curl -X POST http://127.0.0.1:20209/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"transfer","params":{"scid":"bb8714fefca6187c914872ff138fcf4bf883d2ba81dfa73ea19265a2012f3cd0","ringsize":2,"sc_rpc":[{"name":"entrypoint","datatype":"S","value":"AssetToDeroSwapInput"},{"name":"min_dero","datatype":"U","value":"MIN_DERO_HERE"},{"name":"asset_address","datatype":"S","value":"ASSET_SCID_HERE"}],"transfers":[{"scid":"ASSET_SCID_HERE","burn":"ASSETS_SOLD_AMOUNT_HERE"}]}}' -H 'Content-Type: application/json'
+  </code>
+
+  <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(160, 160, 160, 0.75), rgba(0, 0, 0, 0));">
+
+  <h3>AssetToDeroSwapOutput</h3>
+  <p>Convert Assets to DERO, specifying maximum input (ASSETVALUE()) and exact output.</p>
+  <code>
+    curl -X POST http://127.0.0.1:20209/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"transfer","params":{"scid":"bb8714fefca6187c914872ff138fcf4bf883d2ba81dfa73ea19265a2012f3cd0","ringsize":2,"sc_rpc":[{"name":"entrypoint","datatype":"S","value":"AssetToDeroSwapOutput"},{"name":"dero_bought","datatype":"U","value":"DERO_BOUGHT_HERE"},{"name":"asset_address","datatype":"S","value":"ASSET_SCID_HERE"}],"transfers":[{"scid":"ASSET_SCID_HERE","burn":"MAX_ASSETS_SOLD_AMOUNT_HERE"}]}}' -H 'Content-Type: application/json'
+  </code>
+
+</div>
+
 
 </body>
 </html>
