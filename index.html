@@ -19,7 +19,7 @@
     transition: all 0.2s ease-in-out;
   }
   svg {
-  width: 200px; /* Adjust as needed */
+  width: 300px; 
   height: auto;
   animation: float 5s ease-in-out infinite;
 }
@@ -48,10 +48,24 @@
   width: fit-content; /* Or max-content based on browser support */
   margin-left: auto;
   margin-right: auto; /* Centers the note */
-}
+  }
 
   .special-note p {
     margin: 0; /* Remove default paragraph margin */
+  }
+
+  .code-container {
+    overflow-x: auto; /* Allows horizontal scrolling */
+    white-space: nowrap; /* Keeps the command in a single line */
+    padding: 10px; /* Adds some padding around the code */
+    background-color: rgba(0, 0, 0, 0.1); /* Optional: Adds a background color */
+    border-radius: 5px; /* Optional: Rounds the corners */
+    margin-bottom: 20px; /* Adds some space below the container */
+  }
+
+  code {
+    display: block; /* Makes the code element fill the container */
+    white-space: pre-wrap; /* Allows the content to wrap */
   }
 
   .arrow {
@@ -124,58 +138,69 @@
     <p>  Note: The "destination" parameter requires a valid DERO address DIFFERENT FROM THE SENDER'S but, in this context, it serves solely to satisfy the command syntax. Rest assured, the DERO specified will be transferred to the Smart Contract, not the random address provided.
     </p>
   </div>
-  <code>
-    curl -X POST http://127.0.0.1:20209/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"transfer","params":{"scid":"bb8714fefca6187c914872ff138fcf4bf883d2ba81dfa73ea19265a2012f3cd0","ringsize":2,"sc_rpc":[{"name":"entrypoint","datatype":"S","value":"AddLiquidity"},{"name":"asset_address","datatype":"S","value":"ASSET_SCID_HERE"},{"name":"min_liquidity","datatype":"U","value":"MIN_LIQUIDITY_HERE"}],"transfers":[{"burn":"DERO_AMOUNT_HERE","destination":"RANDOM_DESTINATION_ADDRESS_HERE"},{"scid":"ASSET_SCID_HERE","burn":"ASSET_AMOUNT_HERE"}]}}' -H 'Content-Type: application/json'
-  </code>
+  <div class="code-container">
+    <code>
+      curl -X POST http://127.0.0.1:20209/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"transfer","params":{"scid":"bb8714fefca6187c914872ff138fcf4bf883d2ba81dfa73ea19265a2012f3cd0","ringsize":2,"sc_rpc":[{"name":"entrypoint","datatype":"S","value":"AddLiquidity"},{"name":"asset_address","datatype":"S","value":"ASSET_SCID_HERE"},{"name":"min_liquidity","datatype":"U","value":"MIN_LIQUIDITY_HERE"}],"transfers":[{"burn":"DERO_AMOUNT_HERE","destination":"RANDOM_DESTINATION_ADDRESS_HERE"},{"scid":"ASSET_SCID_HERE","burn":"ASSET_AMOUNT_HERE"}]}}' -H 'Content-Type: application/json'
+    </code>
+  </div>
 
   <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(160, 160, 160, 0.75), rgba(0, 0, 0, 0));">
 
   <h3>RemoveLiquidity</h3>
   <p>Burn BOO tokens to withdraw DERO & assets at the current ratio.</p>
-  <code>
-    curl -X POST http://127.0.0.1:20209/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"scinvoke","params":{"scid":"bb8714fefca6187c914872ff138fcf4bf883d2ba81dfa73ea19265a2012f3cd0","ringsize":2,"sc_rpc":[{"name":"entrypoint","datatype":"S","value":"RemoveLiquidity"},{"name":"amount","datatype":"U","value":"AMOUNT_HERE"},{"name":"min_dero","datatype":"U","value":"MIN_DERO_HERE"},{"name":"min_assets","datatype":"U","value":"MIN_ASSETS_HERE"},{"name":"asset_address","datatype":"S","value":"ASSET_SCID_HERE"}]}}' -H 'Content-Type: application/json'
-  </code>
 
+  <div class="code-container">
+    <code>
+      curl -X POST http://127.0.0.1:20209/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"scinvoke","params":{"scid":"bb8714fefca6187c914872ff138fcf4bf883d2ba81dfa73ea19265a2012f3cd0","ringsize":2,"sc_rpc":[{"name":"entrypoint","datatype":"S","value":"RemoveLiquidity"},{"name":"amount","datatype":"U","value":"AMOUNT_HERE"},{"name":"min_dero","datatype":"U","value":"MIN_DERO_HERE"},{"name":"min_assets","datatype":"U","value":"MIN_ASSETS_HERE"},{"name":"asset_address","datatype":"S","value":"ASSET_SCID_HERE"}]}}' -H 'Content-Type: application/json'
+    </code>
+  </div>
   <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(160, 160, 160, 0.75), rgba(0, 0, 0, 0));">
 
   <h3>DeroToAssetSwapInput</h3>
   <p>Convert DERO to Assets, specifying exact input (DEROVALUE()).</p>
-  <code>
-    curl -X POST http://127.0.0.1:20209/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"scinvoke","params":{"sc_dero_deposit":"DERO_AMOUNT_HERE","scid":"bb8714fefca6187c914872ff138fcf4bf883d2ba81dfa73ea19265a2012f3cd0","ringsize":2,"sc_rpc":[{"name":"entrypoint","datatype":"S","value":"DeroToAssetSwapInput"},{"name":"asset_address","datatype":"S","value":"ASSET_SCID_HERE"}]}}' -H 'Content-Type: application/json'
-  </code>
 
+  <div class="code-container">
+    <code>
+      curl -X POST http://127.0.0.1:20209/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"scinvoke","params":{"sc_dero_deposit":"DERO_AMOUNT_HERE","scid":"bb8714fefca6187c914872ff138fcf4bf883d2ba81dfa73ea19265a2012f3cd0","ringsize":2,"sc_rpc":[{"name":"entrypoint","datatype":"S","value":"DeroToAssetSwapInput"},{"name":"asset_address","datatype":"S","value":"ASSET_SCID_HERE"}]}}' -H 'Content-Type: application/json'
+    </code>
+  </div>
   <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(160, 160, 160, 0.75), rgba(0, 0, 0, 0));">
 
   <h3>DeroToAssetSwapInputMin</h3>
   <p>Convert DERO to Assets, specifying exact input (DEROVALUE()) and minimum output.</p>
-  <code>
-    curl -X POST http://127.0.0.1:20209/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"scinvoke","params":{"sc_dero_deposit":"DERO_AMOUNT_HERE","scid":"bb8714fefca6187c914872ff138fcf4bf883d2ba81dfa73ea19265a2012f3cd0","ringsize":2,"sc_rpc":[{"name":"entrypoint","datatype":"S","value":"DeroToAssetSwapInputMin"},{"name":"min_assets","datatype":"U","value":"MIN_ASSETS_HERE"},{"name":"asset_address","datatype":"S","value":"ASSET_SCID_HERE"}]}}' -H 'Content-Type: application/json'
-  </code>
 
+  <div class="code-container">
+    <code>
+      curl -X POST http://127.0.0.1:20209/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"scinvoke","params":{"sc_dero_deposit":"DERO_AMOUNT_HERE","scid":"bb8714fefca6187c914872ff138fcf4bf883d2ba81dfa73ea19265a2012f3cd0","ringsize":2,"sc_rpc":[{"name":"entrypoint","datatype":"S","value":"DeroToAssetSwapInputMin"},{"name":"min_assets","datatype":"U","value":"MIN_ASSETS_HERE"},{"name":"asset_address","datatype":"S","value":"ASSET_SCID_HERE"}]}}' -H 'Content-Type: application/json'
+    </code>
+  </div>
   <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(160, 160, 160, 0.75), rgba(0, 0, 0, 0));">
 
   <h3>DeroToAssetSwapOutput</h3>
   <p>Convert DERO to Assets, specifying maximum input (DEROVALUE()) and exact output.</p>
-  <code>
-    curl -X POST http://127.0.0.1:20209/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"scinvoke","params":{"sc_dero_deposit":"MAX_DERO_AMOUNT_HERE","scid":"bb8714fefca6187c914872ff138fcf4bf883d2ba81dfa73ea19265a2012f3cd0","ringsize":2,"sc_rpc":[{"name":"entrypoint","datatype":"S","value":"DeroToAssetSwapOutput"},{"name":"assets_bought","datatype":"U","value":"ASSETS_BOUGHT_HERE"},{"name":"asset_address","datatype":"S","value":"ASSET_SCID_HERE"}]}}' -H 'Content-Type: application/json'
-  </code>
-
+  <div class="code-container">
+    <code>
+      curl -X POST http://127.0.0.1:20209/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"scinvoke","params":{"sc_dero_deposit":"MAX_DERO_AMOUNT_HERE","scid":"bb8714fefca6187c914872ff138fcf4bf883d2ba81dfa73ea19265a2012f3cd0","ringsize":2,"sc_rpc":[{"name":"entrypoint","datatype":"S","value":"DeroToAssetSwapOutput"},{"name":"assets_bought","datatype":"U","value":"ASSETS_BOUGHT_HERE"},{"name":"asset_address","datatype":"S","value":"ASSET_SCID_HERE"}]}}' -H 'Content-Type: application/json'
+    </code>
+  </div>
   <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(160, 160, 160, 0.75), rgba(0, 0, 0, 0));">
 
   <h3>AssetToDeroSwapInput</h3>
   <p>Convert Assets to DERO, specifying exact input (ASSET_VALUE()) and minimum output.</p>
-  <code>
-    curl -X POST http://127.0.0.1:20209/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"transfer","params":{"scid":"bb8714fefca6187c914872ff138fcf4bf883d2ba81dfa73ea19265a2012f3cd0","ringsize":2,"sc_rpc":[{"name":"entrypoint","datatype":"S","value":"AssetToDeroSwapInput"},{"name":"min_dero","datatype":"U","value":"MIN_DERO_HERE"},{"name":"asset_address","datatype":"S","value":"ASSET_SCID_HERE"}],"transfers":[{"scid":"ASSET_SCID_HERE","burn":"ASSETS_SOLD_AMOUNT_HERE"}]}}' -H 'Content-Type: application/json'
-  </code>
-
+  <div class="code-container">
+    <code>
+      curl -X POST http://127.0.0.1:20209/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"transfer","params":{"scid":"bb8714fefca6187c914872ff138fcf4bf883d2ba81dfa73ea19265a2012f3cd0","ringsize":2,"sc_rpc":[{"name":"entrypoint","datatype":"S","value":"AssetToDeroSwapInput"},{"name":"min_dero","datatype":"U","value":"MIN_DERO_HERE"},{"name":"asset_address","datatype":"S","value":"ASSET_SCID_HERE"}],"transfers":[{"scid":"ASSET_SCID_HERE","burn":"ASSETS_SOLD_AMOUNT_HERE"}]}}' -H 'Content-Type: application/json'
+    </code>
+  </div>
   <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(160, 160, 160, 0.75), rgba(0, 0, 0, 0));">
 
   <h3>AssetToDeroSwapOutput</h3>
   <p>Convert Assets to DERO, specifying maximum input (ASSETVALUE()) and exact output.</p>
-  <code>
-    curl -X POST http://127.0.0.1:20209/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"transfer","params":{"scid":"bb8714fefca6187c914872ff138fcf4bf883d2ba81dfa73ea19265a2012f3cd0","ringsize":2,"sc_rpc":[{"name":"entrypoint","datatype":"S","value":"AssetToDeroSwapOutput"},{"name":"dero_bought","datatype":"U","value":"DERO_BOUGHT_HERE"},{"name":"asset_address","datatype":"S","value":"ASSET_SCID_HERE"}],"transfers":[{"scid":"ASSET_SCID_HERE","burn":"MAX_ASSETS_SOLD_AMOUNT_HERE"}]}}' -H 'Content-Type: application/json'
-  </code>
-
+  <div class="code-container">
+    <code>
+      curl -X POST http://127.0.0.1:20209/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"transfer","params":{"scid":"bb8714fefca6187c914872ff138fcf4bf883d2ba81dfa73ea19265a2012f3cd0","ringsize":2,"sc_rpc":[{"name":"entrypoint","datatype":"S","value":"AssetToDeroSwapOutput"},{"name":"dero_bought","datatype":"U","value":"DERO_BOUGHT_HERE"},{"name":"asset_address","datatype":"S","value":"ASSET_SCID_HERE"}],"transfers":[{"scid":"ASSET_SCID_HERE","burn":"MAX_ASSETS_SOLD_AMOUNT_HERE"}]}}' -H 'Content-Type: application/json'
+    </code>
+  </div>
 </div>
 
 
