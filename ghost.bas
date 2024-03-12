@@ -18,7 +18,7 @@ Function Initialize() Uint64
     10 STORE("owner", SIGNER())
     20 STORE("feeTo", SIGNER())
     30 STORE("nameHdr", "Ghost Exchange")
-    40 STORE("descrHdr", "Spooktacular trades!") 
+    40 STORE("descrHdr", "Phantom-powered finance") 
     50  RETURN 0
 End Function 
 
