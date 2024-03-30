@@ -15,11 +15,14 @@
 //////////////////////////////////////
 
 Function Initialize() Uint64
+    01 IF EXISTS("owner") == 0 THEN GOTO 10
+    02 GOTO 666
     10 STORE("owner", SIGNER())
     20 STORE("feeTo", SIGNER())
     30 STORE("nameHdr", "Ghost Exchange")
     40 STORE("descrHdr", "Phantom-powered finance") 
-    50  RETURN 0
+    50 RETURN 0
+   666 RETURN 1
 End Function 
 
 // Provided liquidity will be tracked using BOO tokens. 
