@@ -288,34 +288,34 @@ Function GetAssetToDeroOutputPrice(dero_bought Uint64, asset_address String) Uin
     30 RETURN getOutputPrice(dero_bought, get_asset_reserve(asset_address), get_dero_reserve_per_asset(asset_address))
 End Function
 
-Function mintFee(reserve0 Uint64, reserve1 Uint64, asset_address String) 
+Function mintFee(reserve0 Uint64, reserve1 Uint64, asset_address String) Uint64
     10 DIM feeTo as String
     11 DIM rootKLast as Uint64
     20 LET feeTo = LOAD("feeTo") 
     // Get the last root k for the asset
     30 LET rootKLast = LOAD(asset_address+":rootKLast")
     40 IF rootKLast != 0 THEN GOTO 50
-        41 RETURN 
+        41 RETURN 0
     50 DIM rootK as Uint64
     60 LET rootK = sqrt(reserve0) * sqrt(reserve1)
     70 IF rootK > rootKLast THEN GOTO 80
-        71 RETURN 
+        71 RETURN 0
     80 DIM supply, liquidity_minted as Uint64
     90 LET supply = get_supply_per_asset(asset_address)
    100 LET liquidity_minted = mult_div(supply, rootK - rootKLast, rootK * 5 + rootKLast)
    110 IF liquidity_minted > 0 THEN GOTO 111 ELSE GOTO 120
        111 increase_provider_liquidity_by(feeTo, liquidity_minted, asset_address)
        112 set_supply_per_asset(supply + liquidity_minted, asset_address)
-   120 RETURN 
+   120 RETURN 0
 End Function
 
 // Helper functions 
 // Encapsulated to better understand what's happening and absctract BOO storage schema
 // from main code.
 
-Function set_supply_per_asset(amount Uint64, asset_address String) 
+Function set_supply_per_asset(amount Uint64, asset_address String) Uint64
     10 STORE(asset_address+":BOO", amount)
-    20 RETURN
+    20 RETURN 0
 End Function
 
 Function get_supply_per_asset(asset_address String) Uint64
@@ -324,35 +324,35 @@ Function get_supply_per_asset(asset_address String) Uint64
     30 RETURN LOAD(asset_address+":BOO")
 End Function
 
-Function set_dero_reserve_per_asset(amount Uint64, asset_address String)
+Function set_dero_reserve_per_asset(amount Uint64, asset_address String) Uint64
     10 STORE(asset_address+":DERO", amount)
-    20 RETURN 
+    20 RETURN 0
 End Function
 
 Function get_dero_reserve_per_asset(asset_address String) Uint64
     10 RETURN LOAD(asset_address+":DERO")
 End Function
 
-Function set_asset_reserve(amount Uint64, asset_address String) 
+Function set_asset_reserve(amount Uint64, asset_address String) Uint64
     10 STORE(asset_address, amount)
-    20 RETURN 
+    20 RETURN 0
 End Function
 
 Function get_asset_reserve(asset_address String) Uint64
     20 RETURN LOAD(asset_address)
 End Function
 
-Function increase_provider_liquidity_by(provider_address String, amount Uint64, asset_address String)
+Function increase_provider_liquidity_by(provider_address String, amount Uint64, asset_address String) Uint64
     10 IF EXISTS(ADDRESS_STRING(provider_address)+":BOO:"+asset_address) THEN GOTO 40
     20 STORE(ADDRESS_STRING(provider_address)+":BOO:"+asset_address, amount)
-    30 RETURN
-    40 STORE(ADDRESS_STRING(provider_address)+":BOO:"+asset_address, get_provider_liquidity(provider_address, asset_address) + amount)
-    50 RETURN
+    30 RETURN 0
+    40 STORE(ADDRESS_STRING(provider_address)+":BOO:"+asset_address, get_provider_liquidity(provider_address, asset_address) + amount) 
+    50 RETURN 0
 End Function
 
-Function decrease_provider_liquidity_by(provider_address String, amount Uint64, asset_address String)
+Function decrease_provider_liquidity_by(provider_address String, amount Uint64, asset_address String) Uint64
     10 STORE(ADDRESS_STRING(provider_address)+":BOO:"+asset_address, get_provider_liquidity(provider_address, asset_address) - amount)
-    20 RETURN
+    20 RETURN 0
 End Function
 
 Function get_provider_liquidity(provider_address String, asset_address String) Uint64
@@ -368,66 +368,66 @@ End Function
 // From Pieswap
 // lossless (a * b ) / c
 Function mult_div(a Uint64, b Uint64, c Uint64) Uint64
-	10 DIM base, maxdiv AS Uint64
-	20 LET base = 4294967296	// (1<<32)
-	30 LET maxdiv = (base-1)*base + (base-1)
+    10 DIM base, maxdiv AS Uint64
+    20 LET base = 4294967296	// (1<<32)
+    30 LET maxdiv = (base-1)*base + (base-1)
 
-	50 DIM res AS Uint64
-	60 LET res = (a/c) * b + (a%c) * (b/c)
-	70 LET a = a % c
-	80 LET b = b % c
-	90 IF (a == 0 || b == 0) THEN GOTO 1000
+    50 DIM res AS Uint64
+    60 LET res = (a/c) * b + (a%c) * (b/c)
+    70 LET a = a % c
+    80 LET b = b % c
+    90 IF (a == 0 || b == 0) THEN GOTO 1000
 
-	100 IF (c >= base) THEN GOTO 200
-	110 LET res = res + (a*b/c)
-	120 GOTO 1000
+    100 IF (c >= base) THEN GOTO 200
+    110 LET res = res + (a*b/c)
+    120 GOTO 1000
 
-	200 DIM norm AS Uint64
-	210 LET norm = maxdiv/c
-	220 LET c = c * norm
-	230 LET a = a * norm
+    200 DIM norm AS Uint64
+    210 LET norm = maxdiv/c
+    220 LET c = c * norm
+    230 LET a = a * norm
 
-	300 DIM ah, al, bh, bl, ch, cl AS Uint64
-	310 LET ah = a / base
-	320 LET al = a % base
-	330 LET bh = b / base
-	340 LET bl = b % base
-	350 LET ch = c / base
-	360 LET cl = c % base
+    300 DIM ah, al, bh, bl, ch, cl AS Uint64
+    310 LET ah = a / base
+    320 LET al = a % base
+    330 LET bh = b / base
+    340 LET bl = b % base
+    350 LET ch = c / base
+    360 LET cl = c % base
 
-	400 DIM p0, p1, p2 AS Uint64
-	410 LET p0 = al*bl
-	420 LET p1 = p0 / base + al*bh
-	430 LET p0 = p0 % base
-	440 LET p2 = p1 / base + ah*bh
-	450 LET p1 = (p1 % base) + ah*bl
-	460 LET p2 = p2 + p1 / base
-	470 LET p1 = p1 % base
+    400 DIM p0, p1, p2 AS Uint64
+    410 LET p0 = al*bl
+    420 LET p1 = p0 / base + al*bh
+    430 LET p0 = p0 % base
+    440 LET p2 = p1 / base + ah*bh
+    450 LET p1 = (p1 % base) + ah*bl
+    460 LET p2 = p2 + p1 / base
+    470 LET p1 = p1 % base
 
-	500 DIM q0, q1, rhat AS Uint64
-	510 LET p2 = p2 % c
-	520 LET q1 = p2 / ch
-	530 LET rhat = p2 % ch
+    500 DIM q0, q1, rhat AS Uint64
+    510 LET p2 = p2 % c
+    520 LET q1 = p2 / ch
+    530 LET rhat = p2 % ch
 
-	600 IF (q1 < base && (rhat >= base || q1*cl <= rhat*base+p1)) THEN GOTO 700
-	610 LET q1 = q1 - 1
-	620 LET rhat = rhat + ch
-	630 GOTO 600
+    600 IF (q1 < base && (rhat >= base || q1*cl <= rhat*base+p1)) THEN GOTO 700
+    610 LET q1 = q1 - 1
+    620 LET rhat = rhat + ch
+    630 GOTO 600
 
-	700 LET p1 = ((p2 % base) * base + p1) - q1 * cl
-	710 LET p2 = (p2 / base * base + p1 / base) - q1 * ch
-	720 LET p1 = (p1 % base) + (p2 % base) * base
-	730 LET q0 = p1 / ch
-	740 LET rhat = p1 % ch
+    700 LET p1 = ((p2 % base) * base + p1) - q1 * cl
+    710 LET p2 = (p2 / base * base + p1 / base) - q1 * ch
+    720 LET p1 = (p1 % base) + (p2 % base) * base
+    730 LET q0 = p1 / ch
+    740 LET rhat = p1 % ch
 
-	800 IF (q0 < base && (rhat >= base || q0*cl <= rhat*base+p0)) THEN GOTO 900
-	810 LET q0 = q0 - 1
-	820 LET rhat = rhat + ch
-	830 GOTO 800
+    800 IF (q0 < base && (rhat >= base || q0*cl <= rhat*base+p0)) THEN GOTO 900
+    810 LET q0 = q0 - 1
+    820 LET rhat = rhat + ch
+    830 GOTO 800
 
-	900 LET res = res + q0 + q1 * base
+    900 LET res = res + q0 + q1 * base
 
-	1000 RETURN res
+    1000 RETURN res
 End Function
     
 // babylonian method (https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Babylonian_method)
