@@ -38,7 +38,7 @@ Function AddLiquidity(asset_address String, min_liquidity Uint64) Uint64
     02 LET SYS_MAX_VALUE = 18446744073709551 // Uint64.Max/1000 to protect from infinite supply tokens
     03 LET dero_deposited = DEROVALUE()
     04 LET asset_deposited = ASSETVALUE(HEXDECODE(asset_address))
-    10 IF (asset_deposited > 0 & dero_deposited > 0 ) THEN GOTO 30
+    10 IF (asset_deposited > 0 && dero_deposited > 0 ) THEN GOTO 30
     20 GOTO 666
     30 LET total_liquidity =  get_supply_per_asset(asset_address) 
     // Pair already exists
@@ -52,7 +52,7 @@ Function AddLiquidity(asset_address String, min_liquidity Uint64) Uint64
         47 LET total_liquidity = get_supply_per_asset(asset_address) // Must be defined again since totalSupply can update in mintFee
         48 LET asset_amount =   mult_div(dero_deposited, asset_reserve , dero_reserve + 1)
         49 LET liquidity_minted = mult_div(dero_deposited, total_liquidity, dero_reserve)
-        50 IF asset_deposited >= asset_amount & liquidity_minted >= min_liquidity & (asset_reserve + asset_deposited <= SYS_MAX_VALUE) THEN GOTO 52
+        50 IF asset_deposited >= asset_amount && liquidity_minted >= min_liquidity && (asset_reserve + asset_deposited <= SYS_MAX_VALUE) THEN GOTO 52
         51 GOTO 666
         52 increase_provider_liquidity_by(SIGNER(), liquidity_minted, asset_address) 
         53 set_supply_per_asset(total_liquidity + liquidity_minted, asset_address)
@@ -68,7 +68,7 @@ Function AddLiquidity(asset_address String, min_liquidity Uint64) Uint64
         59 GOTO 70
     // else
     // Creating pair  
-    60 IF dero_deposited >= 1000 & asset_deposited <= SYS_MAX_VALUE THEN GOTO 62
+    60 IF dero_deposited >= 1000 && asset_deposited <= SYS_MAX_VALUE THEN GOTO 62
         61 GOTO 666
         // Initialize the asset reserve record for this asset
         62 set_asset_reserve(asset_deposited, asset_address)
@@ -91,7 +91,7 @@ End Function
 // {asset_address} The deposited asset's SCID
 Function RemoveLiquidity(amount Uint64, min_dero Uint64, min_assets Uint64, asset_address String) Uint64
     01  DIM total_liquidity, dero_reserve, asset_reserve, dero_amount, asset_amount as Uint64
-    10  IF amount > 0  & (min_dero > 0 & min_assets > 0) & ( get_provider_liquidity(SIGNER(), asset_address) >= amount ) THEN GOTO 30
+    10  IF amount > 0  && (min_dero > 0 && min_assets > 0) && ( get_provider_liquidity(SIGNER(), asset_address) >= amount ) THEN GOTO 30
     20  GOTO 666
     30  LET total_liquidity = get_supply_per_asset(asset_address)
     40  IF total_liquidity > 0 THEN GOTO 60
@@ -102,7 +102,7 @@ Function RemoveLiquidity(amount Uint64, min_dero Uint64, min_assets Uint64, asse
     90  LET total_liquidity = get_supply_per_asset(asset_address) // Must be defined again since totalSupply can update in mintFee
    100  LET dero_amount  = mult_div(amount, dero_reserve, total_liquidity)
    110  LET asset_amount = mult_div(amount, asset_reserve, total_liquidity)
-   120  IF dero_amount >= min_dero & asset_amount >= min_assets THEN GOTO 140
+   120  IF dero_amount >= min_dero && asset_amount >= min_assets THEN GOTO 140
    130  GOTO 666
    140  decrease_provider_liquidity_by(SIGNER(), amount, asset_address)
    150  set_supply_per_asset(total_liquidity - amount, asset_address)
@@ -123,7 +123,7 @@ End Function
 Function getInputPrice(input_amount Uint64, input_reserve Uint64, output_reserve Uint64) Uint64
     01 DIM SYS_MAX_VALUE as Uint64
     02 LET SYS_MAX_VALUE = 18446744073709551
-    10 IF input_reserve > 0 & output_reserve > 0 & input_amount <= SYS_MAX_VALUE THEN GOTO 30
+    10 IF input_reserve > 0 && output_reserve > 0 && input_amount <= SYS_MAX_VALUE THEN GOTO 30
     20 PANIC
     30 DIM input_amount_with_fee as Uint64
     40 LET input_amount_with_fee = input_amount * 997
@@ -143,7 +143,7 @@ Function getOutputPrice(output_amount Uint64, input_reserve Uint64, output_reser
 End Function
 
 Function deroToAssetInput(dero_sold Uint64, min_assets Uint64, asset_address String) Uint64
-    10 IF  (dero_sold > 0 & min_assets > 0) THEN GOTO 30
+    10 IF  (dero_sold > 0 && min_assets > 0) THEN GOTO 30
     20 PANIC
     30 DIM assets_bought, asset_reserve, dero_reserve as Uint64
     40 LET asset_reserve = get_asset_reserve(asset_address)
@@ -174,7 +174,7 @@ Function DeroToAssetSwapInputMin(min_assets Uint64, asset_address String) Uint64
 End Function
 
 Function deroToAssetOutput(assets_bought Uint64, max_dero Uint64, asset_address String) Uint64
-    10 IF (assets_bought > 0 & max_dero > 0) THEN GOTO 30
+    10 IF (assets_bought > 0 && max_dero > 0) THEN GOTO 30
     20 PANIC
     30 DIM asset_reserve, dero_reserve, dero_sold, dero_refund as Uint64
     40 LET asset_reserve = get_asset_reserve(asset_address)
@@ -200,7 +200,7 @@ Function DeroToAssetSwapOutput(assets_bought Uint64, asset_address String) Uint6
 End Function
 
 Function assetToDeroInput(assets_sold Uint64, min_dero Uint64, asset_address String) Uint64
-    10 IF (assets_sold > 0 & min_dero > 0) THEN GOTO 30
+    10 IF (assets_sold > 0 && min_dero > 0) THEN GOTO 30
     20 PANIC
     30 DIM asset_reserve, dero_bought as Uint64
     40 LET asset_reserve = get_asset_reserve(asset_address)
