@@ -23,9 +23,8 @@ function getOutputPrice(outputAmount: number, inputReserve: number, outputReserv
 }
 
 const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
-  const [inputValue, setInputValue] = useState('0');
-  const [assetValue, setAssetValue] = useState<number>(0);
-  const [deroValue, setDeroValue] = useState<number>(0);
+  const [assetValue, setAssetValue] = useState('0');
+  const [deroValue, setDeroValue] = useState('0');
   const [direction, setDirection] = useState<SwapDirection>(SwapDirection.ASSET_TO_DERO);
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | undefined>(undefined);
   const [assetReserve, setAssetReserve] = useState<number | undefined>();
@@ -59,12 +58,6 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
     setSelectedPairPrice((numerator / denominator).toFixed(5));
   }, [selectedPair, tradingPairsBalances, setSelectedPairPrice, setAssetReserve, setDeroReserve]);
 
-  // Handle Asset Value change
-  useEffect(() => {
-    if (!selectedPair || !tradingPairsBalances) return;
-    if (!tradingPairsBalances[selectedPair]) return;
-  }, [assetValue, setDeroValue]);
-
   // Function to handle asset input changes
   const handleAssetValueChange = useCallback((inputValue: string) => {
     // Convert input value to a number
@@ -72,56 +65,43 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
 
     // Check if the number is a decimal
     if (isNaN(numberValue)) {
-      // Set to empty string if not a number
-      console.log('NAN!')
-      setAssetValue(0);
+      // Set to 0 if not a number
+      setAssetValue('0');
+      setDeroValue('0');
       return;
     }
 
     // Fix to at most 5 decimal places if it is a decimal
     const fixedValue = numberValue.toFixed(5);
-    const atomicUnits = Math.round(parseFloat(fixedValue) * 100000);
-    setAssetValue(atomicUnits);
-    console.log('Atomic units: ', atomicUnits)
+    const atomicUnits = Math.round(parseFloat(fixedValue) * (1/DERO_ATOMIC_UNIT_FACTOR));
     if (!assetReserve || !deroReserve) return;
     //Calculate opposite input value
     var unitsSold = 0;
-    console.log('Assets: ', assetReserve);
-    console.log('Dero: ', deroReserve);
     if (direction == SwapDirection.ASSET_TO_DERO) {
       unitsSold = getInputPrice(atomicUnits, assetReserve, deroReserve);
-      console.log('Units sold: ', unitsSold);
     } else if (direction == SwapDirection.DERO_TO_ASSET) {
       unitsSold = getOutputPrice(atomicUnits, deroReserve, assetReserve);
     }
-    setDeroValue(unitsSold)
+    setDeroValue(atomicUnitsToString(unitsSold));
 
   }, [assetReserve, deroReserve, direction, setAssetValue, setDeroValue]);
 
   // Function to handle asset input changes
-  const handleDeroValueChange = (
-    inputValue: string,
-    assetReserve: number | undefined,
-    deroReserve: number | undefined,
-    setAssetValue: React.Dispatch<React.SetStateAction<number>>,
-    setDeroValue: React.Dispatch<React.SetStateAction<number>>
-  ) => {
+  const handleDeroValueChange = useCallback((inputValue: string) => {
     // Convert input value to a number
     const numberValue = parseFloat(inputValue);
 
     // Check if the number is a decimal
     if (isNaN(numberValue)) {
-      // Set to empty string if not a number
-      console.log('NAN!')
-      setDeroValue(0);
+      // Set to 0 if not a number
+      setDeroValue('0');
+      setAssetValue('0');
       return;
     }
 
     // Fix to at most 5 decimal places if it is a decimal
     const fixedValue = numberValue.toFixed(5);
-    const atomicUnits = Math.round(parseFloat(fixedValue) * 100000);
-    // Remove trailing zeros and unnecessary decimal point
-    setDeroValue(atomicUnits);
+    const atomicUnits = Math.round(parseFloat(fixedValue) * (1/DERO_ATOMIC_UNIT_FACTOR));
 
     if (!assetReserve || !deroReserve) return;
     //Calculate opposite input value
@@ -131,9 +111,9 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
     } else if (direction == SwapDirection.DERO_TO_ASSET) {
       unitsSold = getInputPrice(atomicUnits, deroReserve, assetReserve);
     }
-    setAssetValue(unitsSold)
+    setAssetValue(atomicUnitsToString(unitsSold))
 
-  };
+  }, [assetReserve, deroReserve, direction, setAssetValue, setDeroValue]);
 
   // Function to toggle swap direction
   const toggleDirection = () => {
@@ -148,12 +128,25 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
     return regex.test(inputValue);
   };
 
-  // Handle changes in input and trigger debounce
+  const atomicUnitsToString = (atomicUnits: number) =>{
+    const numberAsString = (atomicUnits * DERO_ATOMIC_UNIT_FACTOR).toFixed(5)
+    return numberAsString
+  }
+
+  // Handle changes in asset input and trigger debounce
   const handleAssetInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
     if (validateInput(value)) {
-      setInputValue(value);
+      setAssetValue(value);
       debounce(() => handleAssetValueChange(value));
+    }
+  };
+  
+  const handleDeroInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = event.target;
+    if (validateInput(value)) {
+      setDeroValue(value);
+      debounce(() => handleDeroValueChange(value));
     }
   };
 
@@ -170,7 +163,7 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
         type="number"
         className="flex-1 p-3 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary placeholder-gray-400"
         placeholder="From Amount"
-        value={inputValue}
+        value={assetValue}
         onChange={handleAssetInputChange}
       />
       <select
@@ -194,8 +187,8 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
         type="number"
         className="flex-1 p-3 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary placeholder-gray-400"
         placeholder="To Amount"
-        value={(deroValue * DERO_ATOMIC_UNIT_FACTOR).toFixed(5)}
-        onChange={e => handleDeroValueChange(e.target.value, assetReserve, deroReserve, setAssetValue, setDeroValue)}
+        value={deroValue}
+        onChange={handleDeroInputChange}
       />
       <div className="w-1/3 p-3 border border-gray-300 rounded-md shadow-sm text-gray-700 focus:ring-primary focus:border-primary bg-gray-100">
         DERO
