@@ -73,9 +73,9 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
 
     // Fix to at most 5 decimal places if it is a decimal
     const fixedValue = numberValue.toFixed(5);
-    const atomicUnits = Math.round(parseFloat(fixedValue) * (1/DERO_ATOMIC_UNIT_FACTOR));
+    const atomicUnits = Math.round(parseFloat(fixedValue) * (1 / DERO_ATOMIC_UNIT_FACTOR));
     if (!assetReserve || !deroReserve) return;
-    //Calculate opposite input value
+    // Calculate opposite input value
     var unitsSold = 0;
     if (direction == SwapDirection.ASSET_TO_DERO) {
       unitsSold = getInputPrice(atomicUnits, assetReserve, deroReserve);
@@ -101,10 +101,10 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
 
     // Fix to at most 5 decimal places if it is a decimal
     const fixedValue = numberValue.toFixed(5);
-    const atomicUnits = Math.round(parseFloat(fixedValue) * (1/DERO_ATOMIC_UNIT_FACTOR));
+    const atomicUnits = Math.round(parseFloat(fixedValue) * (1 / DERO_ATOMIC_UNIT_FACTOR));
 
     if (!assetReserve || !deroReserve) return;
-    //Calculate opposite input value
+    // Calculate opposite input value
     var unitsSold = 0;
     if (direction == SwapDirection.ASSET_TO_DERO) {
       unitsSold = getOutputPrice(atomicUnits, assetReserve, deroReserve);
@@ -128,9 +128,9 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
     return regex.test(inputValue);
   };
 
-  const atomicUnitsToString = (atomicUnits: number) =>{
-    const numberAsString = (atomicUnits * DERO_ATOMIC_UNIT_FACTOR).toFixed(5)
-    return numberAsString
+  const atomicUnitsToString = (atomicUnits: number) => {
+    const numberAsString = (atomicUnits * DERO_ATOMIC_UNIT_FACTOR).toFixed(5);
+    return numberAsString;
   }
 
   // Handle changes in asset input and trigger debounce
@@ -141,7 +141,7 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
       debounce(() => handleAssetValueChange(value));
     }
   };
-  
+
   const handleDeroInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
     if (validateInput(value)) {
