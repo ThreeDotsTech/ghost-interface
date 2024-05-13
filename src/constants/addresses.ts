@@ -1,0 +1,1 @@
+export const GHOST_EXCHANGE_SCID = "bb8714fefca6187c914872ff138fcf4bf883d2ba81dfa73ea19265a2012f3cd0";
