@@ -165,6 +165,7 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
         placeholder="From Amount"
         value={assetValue}
         onChange={handleAssetInputChange}
+        onFocus={(e) => e.target.select()}
       />
       <select
         className="w-1/3 p-3 border border-gray-300 rounded-md shadow-sm text-gray-700 focus:ring-primary focus:border-primary"
@@ -189,6 +190,7 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
         placeholder="To Amount"
         value={deroValue}
         onChange={handleDeroInputChange}
+        onFocus={(e) => e.target.select()}
       />
       <div className="w-1/3 p-3 border border-gray-300 rounded-md shadow-sm text-gray-700 focus:ring-primary focus:border-primary bg-gray-100">
         DERO
