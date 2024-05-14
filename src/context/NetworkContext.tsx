@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback, useMemo } from 'react';
-import { Api, AppInfo, ConnectionState, DEROGetInfoResult, EventType, Result, generateAppId, to } from "dero-xswd-api";
+import { Api, AppInfo, DEROGetInfoResult, EventType, Result, generateAppId, to } from "dero-xswd-api";
 import { ConnectionType, NetworkContext } from './Types';
 
 const name = "Ghost Exchange";
