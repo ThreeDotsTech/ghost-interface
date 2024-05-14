@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useSwap } from '../context/SwapContext';
 import { DERO_ATOMIC_UNIT_FACTOR } from '../constants/misc';
+import { atomicUnitsToString, validateAssetUnitsFormat } from '../utils';
+import { getInputPrice, getOutputPrice } from '../utils/swap';
 
 interface SwapFormProps {
   selectedPair: string | undefined;
@@ -10,16 +12,6 @@ interface SwapFormProps {
 enum SwapDirection {
   ASSET_TO_DERO = "ASSET_TO_DERO",
   DERO_TO_ASSET = "DERO_TO_ASSET",
-}
-
-function getInputPrice(inputAmount: number, inputReserve: number, outputReserve: number) {
-  const inputAmountWithFee = inputAmount * 997;
-  console.log('Input amount with fee: ', inputAmountWithFee);
-  return inputAmountWithFee * outputReserve / ((inputReserve * 1000) + inputAmountWithFee);
-}
-
-function getOutputPrice(outputAmount: number, inputReserve: number, outputReserve: number) {
-  return (inputReserve * 1000) * outputAmount / ((outputReserve - outputAmount) * 997 + 1);
 }
 
 const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
@@ -74,6 +66,7 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
     // Fix to at most 5 decimal places if it is a decimal
     const fixedValue = numberValue.toFixed(5);
     const atomicUnits = Math.round(parseFloat(fixedValue) * (1 / DERO_ATOMIC_UNIT_FACTOR));
+
     if (!assetReserve || !deroReserve) return;
     // Calculate opposite input value
     var unitsSold = 0;
@@ -86,7 +79,7 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
 
   }, [assetReserve, deroReserve, direction, setAssetValue, setDeroValue]);
 
-  // Function to handle asset input changes
+  // Function to handle dero input changes
   const handleDeroValueChange = useCallback((inputValue: string) => {
     // Convert input value to a number
     const numberValue = parseFloat(inputValue);
@@ -122,21 +115,10 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
     );
   };
 
-  // Validate input to allow no more than 5 decimal places
-  const validateInput = (inputValue: string) => {
-    const regex = /^\d*\.?\d{0,5}$/;
-    return regex.test(inputValue);
-  };
-
-  const atomicUnitsToString = (atomicUnits: number) => {
-    const numberAsString = (atomicUnits * DERO_ATOMIC_UNIT_FACTOR).toFixed(5);
-    return numberAsString;
-  }
-
   // Handle changes in asset input and trigger debounce
   const handleAssetInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
-    if (validateInput(value)) {
+    if (validateAssetUnitsFormat(value)) {
       setAssetValue(value);
       debounce(() => handleAssetValueChange(value));
     }
@@ -144,7 +126,7 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
 
   const handleDeroInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
-    if (validateInput(value)) {
+    if (validateAssetUnitsFormat(value)) {
       setDeroValue(value);
       debounce(() => handleDeroValueChange(value));
     }
