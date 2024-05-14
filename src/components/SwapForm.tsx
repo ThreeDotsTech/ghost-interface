@@ -14,10 +14,16 @@ enum SwapDirection {
   DERO_TO_ASSET = "DERO_TO_ASSET",
 }
 
+enum LastInput {
+  DERO = "DERO",
+  ASSET = "ASSET",
+}
+
 const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
   const [assetValue, setAssetValue] = useState('0');
   const [deroValue, setDeroValue] = useState('0');
   const [direction, setDirection] = useState<SwapDirection>(SwapDirection.ASSET_TO_DERO);
+  const [lastInput, setLastInput] = useState<LastInput>(LastInput.DERO)
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | undefined>(undefined);
   const [assetReserve, setAssetReserve] = useState<number | undefined>();
   const [deroReserve, setDeroReserve] = useState<number | undefined>();
@@ -51,7 +57,7 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
   }, [selectedPair, tradingPairsBalances, setSelectedPairPrice, setAssetReserve, setDeroReserve]);
 
   // Function to handle asset input changes
-  const handleAssetValueChange = useCallback((inputValue: string) => {
+  const handleAssetValueChange = useCallback((inputValue: string, updatedDirection?: SwapDirection) => {
     // Convert input value to a number
     const numberValue = parseFloat(inputValue);
 
@@ -70,9 +76,17 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
     if (!assetReserve || !deroReserve) return;
     // Calculate opposite input value
     var unitsSold = 0;
-    if (direction == SwapDirection.ASSET_TO_DERO) {
+    var currentDirection: SwapDirection;
+
+    if (updatedDirection) {
+      currentDirection = updatedDirection;
+    } else {
+      currentDirection = direction
+    }
+
+    if (currentDirection == SwapDirection.ASSET_TO_DERO) {
       unitsSold = getInputPrice(atomicUnits, assetReserve, deroReserve);
-    } else if (direction == SwapDirection.DERO_TO_ASSET) {
+    } else if (currentDirection == SwapDirection.DERO_TO_ASSET) {
       unitsSold = getOutputPrice(atomicUnits, deroReserve, assetReserve);
     }
     setDeroValue(atomicUnitsToString(unitsSold));
@@ -80,7 +94,7 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
   }, [assetReserve, deroReserve, direction, setAssetValue, setDeroValue]);
 
   // Function to handle dero input changes
-  const handleDeroValueChange = useCallback((inputValue: string) => {
+  const handleDeroValueChange = useCallback((inputValue: string, updatedDirection?: SwapDirection) => {
     // Convert input value to a number
     const numberValue = parseFloat(inputValue);
 
@@ -99,9 +113,17 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
     if (!assetReserve || !deroReserve) return;
     // Calculate opposite input value
     var unitsSold = 0;
-    if (direction == SwapDirection.ASSET_TO_DERO) {
+    var currentDirection: SwapDirection;
+
+    if (updatedDirection) {
+      currentDirection = updatedDirection;
+    } else {
+      currentDirection = direction
+    }
+
+    if (currentDirection == SwapDirection.ASSET_TO_DERO) {
       unitsSold = getOutputPrice(atomicUnits, assetReserve, deroReserve);
-    } else if (direction == SwapDirection.DERO_TO_ASSET) {
+    } else if (currentDirection == SwapDirection.DERO_TO_ASSET) {
       unitsSold = getInputPrice(atomicUnits, deroReserve, assetReserve);
     }
     setAssetValue(atomicUnitsToString(unitsSold))
@@ -110,15 +132,22 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
 
   // Function to toggle swap direction
   const toggleDirection = () => {
-    setDirection(prevDirection =>
-      prevDirection === SwapDirection.ASSET_TO_DERO ? SwapDirection.DERO_TO_ASSET : SwapDirection.ASSET_TO_DERO
-    );
+    setDirection((prevDirection: React.SetStateAction<SwapDirection>) => {
+      const newDirection = prevDirection === SwapDirection.ASSET_TO_DERO ? SwapDirection.DERO_TO_ASSET : SwapDirection.ASSET_TO_DERO;
+      if (lastInput === LastInput.ASSET) {
+        handleAssetValueChange(assetValue, newDirection);
+      } else {
+        handleDeroValueChange(deroValue, newDirection);
+      }
+      return newDirection;
+    });
   };
 
   // Handle changes in asset input and trigger debounce
   const handleAssetInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
     if (validateAssetUnitsFormat(value)) {
+      setLastInput(LastInput.ASSET);
       setAssetValue(value);
       debounce(() => handleAssetValueChange(value));
     }
@@ -127,6 +156,7 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
   const handleDeroInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
     if (validateAssetUnitsFormat(value)) {
+      setLastInput(LastInput.DERO);
       setDeroValue(value);
       debounce(() => handleDeroValueChange(value));
     }
