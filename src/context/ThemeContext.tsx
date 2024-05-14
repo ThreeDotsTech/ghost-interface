@@ -9,7 +9,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [theme, setTheme] = useState<Theme>('night'); // Default theme
+  const [theme, setTheme] = useState<Theme>('day'); // Default theme
 
   useEffect(() => {
     const root = window.document.documentElement;
