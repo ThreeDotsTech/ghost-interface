@@ -21,8 +21,8 @@ enum LastInput {
 
 const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
   const [assetValue, setAssetValue] = useState('0');
-  const [assetErrorMessage, setAssetErrorMessage] = useState<undefined | string>();
   const [deroValue, setDeroValue] = useState('0');
+  const [assetErrorMessage, setAssetErrorMessage] = useState<undefined | string>();
   const [deroErrorMessage, setDeroErrorMessage] = useState<undefined | string>();
   const [direction, setDirection] = useState<SwapDirection>(SwapDirection.ASSET_TO_DERO);
   const [lastInput, setLastInput] = useState<LastInput>(LastInput.DERO)
@@ -156,6 +156,7 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
     });
   };
 
+  // Function to show an error message below Dero Input, and remove it after 2 secs.
   const setDeroErrorMessageWithTimeout = (message: string) => {
     setDeroErrorMessage(message);
     const id = setTimeout(() => {
@@ -165,7 +166,7 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
     }, 2000);
     setErrorMessageTimeoutId(id);
   };
-
+  // Function to show an error message below Asset Input, and remove it after 2 secs.
   const setAssetErrorMessageWithTimeout = (message: string) => {
     setAssetErrorMessage(message);
     const id = setTimeout(() => {
@@ -176,7 +177,7 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
     setErrorMessageTimeoutId(id);
   };
 
-  // Clear the timeout if there is a change in the input fields
+  // Clear the Error timeout if there is a change in the input fields
   useEffect(() => {
     return () => {
       if (errorMessageTimeoutId) clearTimeout(errorMessageTimeoutId);
@@ -194,7 +195,7 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
       debounce(() => handleAssetValueChange(value));
     }
   };
-
+  // Handle changes in dero input and trigger debounce
   const handleDeroInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
     if (validateAssetUnitsFormat(value)) {
@@ -210,6 +211,7 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
   useEffect(() => {
     return () => {
       if (inpuChangetTimeoutId) clearTimeout(inpuChangetTimeoutId);
+      if (errorMessageTimeoutId) clearTimeout(errorMessageTimeoutId);
     };
   }, [inpuChangetTimeoutId]);
 
