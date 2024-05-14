@@ -21,10 +21,13 @@ enum LastInput {
 
 const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
   const [assetValue, setAssetValue] = useState('0');
+  const [assetErrorMessage, setAssetErrorMessage] = useState<undefined | string>();
   const [deroValue, setDeroValue] = useState('0');
+  const [deroErrorMessage, setDeroErrorMessage] = useState<undefined | string>();
   const [direction, setDirection] = useState<SwapDirection>(SwapDirection.ASSET_TO_DERO);
   const [lastInput, setLastInput] = useState<LastInput>(LastInput.DERO)
-  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | undefined>(undefined);
+  const [inpuChangetTimeoutId, setInpuChangetTimeoutId] = useState<NodeJS.Timeout | undefined>(undefined);
+  const [errorMessageTimeoutId, setErrorMessageTimeoutId] = useState<NodeJS.Timeout | undefined>(undefined);
   const [assetReserve, setAssetReserve] = useState<number | undefined>();
   const [deroReserve, setDeroReserve] = useState<number | undefined>();
   const { tradingPairs, tradingPairsBalances } = useSwap();
@@ -32,9 +35,9 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
 
   // Debounce function that takes a callback
   const debounce = (callback: () => void, delay = 500) => {
-    if (timeoutId) clearTimeout(timeoutId);
+    if (inpuChangetTimeoutId) clearTimeout(inpuChangetTimeoutId);
     const id = setTimeout(callback, delay);
-    setTimeoutId(id);
+    setInpuChangetTimeoutId(id);
   };
 
   // Set the initial selected trading pair
@@ -84,6 +87,11 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
       currentDirection = direction
     }
 
+    if (currentDirection == SwapDirection.DERO_TO_ASSET && atomicUnits >= assetReserve) {
+      setAssetErrorMessageWithTimeout('Not enough liquidity to recieve desired asset amount.');
+      return;
+    }
+
     if (currentDirection == SwapDirection.ASSET_TO_DERO) {
       unitsSold = getInputPrice(atomicUnits, assetReserve, deroReserve);
     } else if (currentDirection == SwapDirection.DERO_TO_ASSET) {
@@ -121,6 +129,11 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
       currentDirection = direction
     }
 
+    if (currentDirection == SwapDirection.ASSET_TO_DERO && atomicUnits >= deroReserve) {
+      setDeroErrorMessageWithTimeout('Not enough liquidity to recieve desired Dero amount.');
+      return;
+    }
+
     if (currentDirection == SwapDirection.ASSET_TO_DERO) {
       unitsSold = getOutputPrice(atomicUnits, assetReserve, deroReserve);
     } else if (currentDirection == SwapDirection.DERO_TO_ASSET) {
@@ -143,10 +156,39 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
     });
   };
 
+  const setDeroErrorMessageWithTimeout = (message: string) => {
+    setDeroErrorMessage(message);
+    const id = setTimeout(() => {
+      setDeroErrorMessage(undefined);
+      setAssetValue('0');
+      setDeroValue('0');
+    }, 2000);
+    setErrorMessageTimeoutId(id);
+  };
+
+  const setAssetErrorMessageWithTimeout = (message: string) => {
+    setAssetErrorMessage(message);
+    const id = setTimeout(() => {
+      setAssetErrorMessage(undefined);
+      setAssetValue('0');
+      setDeroValue('0');
+    }, 2000);
+    setErrorMessageTimeoutId(id);
+  };
+
+  // Clear the timeout if there is a change in the input fields
+  useEffect(() => {
+    return () => {
+      if (errorMessageTimeoutId) clearTimeout(errorMessageTimeoutId);
+    };
+  }, [assetValue, deroValue]);
+
   // Handle changes in asset input and trigger debounce
   const handleAssetInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
     if (validateAssetUnitsFormat(value)) {
+      setDeroErrorMessage(undefined);
+      setAssetErrorMessage(undefined);
       setLastInput(LastInput.ASSET);
       setAssetValue(value);
       debounce(() => handleAssetValueChange(value));
@@ -156,6 +198,8 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
   const handleDeroInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
     if (validateAssetUnitsFormat(value)) {
+      setDeroErrorMessage(undefined);
+      setAssetErrorMessage(undefined);
       setLastInput(LastInput.DERO);
       setDeroValue(value);
       debounce(() => handleDeroValueChange(value));
@@ -165,11 +209,12 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
   // Cleanup
   useEffect(() => {
     return () => {
-      if (timeoutId) clearTimeout(timeoutId);
+      if (inpuChangetTimeoutId) clearTimeout(inpuChangetTimeoutId);
     };
-  }, [timeoutId]);
+  }, [inpuChangetTimeoutId]);
 
   const assetInput = (
+    <div>
     <div className="flex gap-4 items-center">
       <input
         type="number"
@@ -192,21 +237,30 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
         ))}
       </select>
     </div>
+    {assetErrorMessage && (
+        <p className="text-red-500 text-sm mt-1">{assetErrorMessage}</p>
+      )}
+    </div>
   );
 
   const deroInput = (
-    <div className="flex gap-4 items-center">
-      <input
-        type="number"
-        className="flex-1 p-3 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary placeholder-gray-400"
-        placeholder="To Amount"
-        value={deroValue}
-        onChange={handleDeroInputChange}
-        onFocus={(e) => e.target.select()}
-      />
-      <div className="w-1/3 p-3 border border-gray-300 rounded-md shadow-sm text-gray-700 focus:ring-primary focus:border-primary bg-gray-100">
-        DERO
+    <div>
+      <div className="flex gap-4 items-center">
+        <input
+          type="number"
+          className="flex-1 p-3 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary placeholder-gray-400"
+          placeholder="To Amount"
+          value={deroValue}
+          onChange={handleDeroInputChange}
+          onFocus={(e) => e.target.select()}
+        />
+        <div className="w-1/3 p-3 border border-gray-300 rounded-md shadow-sm text-gray-700 focus:ring-primary focus:border-primary bg-gray-100">
+          DERO
+        </div>
       </div>
+      {deroErrorMessage && (
+        <p className="text-red-500 text-sm mt-1">{deroErrorMessage}</p>
+      )}
     </div>
   );
 
