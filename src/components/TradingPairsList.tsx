@@ -1,12 +1,12 @@
 import React from 'react';
-
+import { useSwap } from '../context/SwapContext';
 interface TradingPairsListProps {
   tradingPairs: string[] | null;
-  selectedPair: string | undefined;
   onSelectPair: (pair: string) => void;
 }
 
-const TradingPairsList: React.FC<TradingPairsListProps> = ({ tradingPairs, selectedPair, onSelectPair }) => {
+const TradingPairsList: React.FC<TradingPairsListProps> = ({ tradingPairs, onSelectPair }) => {
+  const { selectedPair } = useSwap();
   return (
     <div className="px-6 py-4 mr-10 w-72 bg-white shadow-lg rounded-lg border border-gray-200">
       <h2 className="text-xl font-semibold mb-4 text-gray-800">Trading Pairs</h2>

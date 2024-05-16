@@ -11,6 +11,16 @@ export type WalletInfo = {
   balances: { [key: string]: number | null | string};
 }
 
+export enum SwapDirection {
+  ASSET_TO_DERO = "ASSET_TO_DERO",
+  DERO_TO_ASSET = "DERO_TO_ASSET"
+}
+
+export enum SwapType {
+  INPUT = "INPUT",
+  OUTPUT = "OUTPUT"
+}
+
 export type NetworkContext = {
   isConnected: boolean;
   connectionType: ConnectionType | null;
@@ -31,6 +41,9 @@ export type NetworkContext = {
 export type SwapContext = {
   tradingPairs: string[] | null;
   tradingPairsBalances: TradingPairBalances | null;
+  selectedPair: string | undefined;
+  setSelectedPair: React.Dispatch<React.SetStateAction<string | undefined>>;
+  executeTrade: (amount: number, swapDirection: SwapDirection, swapType: SwapType) => void;
 }
 
 export type TradingPairBalances = {

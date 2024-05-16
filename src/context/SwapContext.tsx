@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode, useEffect, useMemo } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect, useMemo, useCallback } from 'react';
 import { to } from "dero-xswd-api";
 import { SwapContext, TradingPairBalances } from './Types';
 import { GHOST_EXCHANGE_SCID } from '../constants/addresses';
@@ -22,11 +22,13 @@ export const useSwap = () => {
 export const SwapProvider = ({ children }: { children: ReactNode }) => {
     const {xswd} = useNetwork();
     const [tradingPairs, setTradingPairs] = useState<string[] | null>(null)
+    const [balances, setBalances] = useState<TradingPairBalances>({});
+    const [selectedPair, setSelectedPair] = useState<string | undefined>(undefined);
     const [stringkeys, setStringKeys] = useState<{
         [k: string]: string | number;
         C: string;
     } | undefined>(undefined);
-    const [balances, setBalances] = useState<TradingPairBalances>({});
+    
 
     const  getContractInfo = () => {
         if (!xswd) return;
@@ -75,6 +77,12 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [tradingPairs, stringkeys]);
 
+    // Exposed to connect to Xswd
+    const executeTrade = useCallback(async () => {
+        if (!xswd) return; // Early return if xswd is not set
+
+    }, [xswd]);
+
     // Initialize Provider
     //TODO: Handle sad path.
     useEffect(() => {
@@ -89,9 +97,12 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
         <SwapContext.Provider
             value={{
                 tradingPairs:  tradingPairs ?? null,
-                tradingPairsBalances: balances ?? null
+                tradingPairsBalances: balances ?? null,
+                executeTrade,
+                selectedPair, 
+                setSelectedPair
             }}>
             {children}
         </SwapContext.Provider>,
-        [tradingPairs, balances]);
+        [tradingPairs, balances, selectedPair, setSelectedPair]);
   };

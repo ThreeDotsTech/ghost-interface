@@ -5,15 +5,10 @@ import { atomicUnitsToString, validateAssetUnitsFormat } from '../utils';
 import { getInputPrice, getOutputPrice } from '../utils/swap';
 import { useNetwork } from '../context/NetworkContext';
 import { DERO_SCID } from '../constants/addresses';
+import { SwapDirection } from '../context/Types';
 
 interface SwapFormProps {
-  selectedPair: string | undefined;
   onPairSelect: (pair: string) => void;
-}
-
-enum SwapDirection {
-  ASSET_TO_DERO = "ASSET_TO_DERO",
-  DERO_TO_ASSET = "DERO_TO_ASSET",
 }
 
 enum LastInput {
@@ -21,7 +16,7 @@ enum LastInput {
   ASSET = "ASSET",
 }
 
-const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
+const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
   const [assetValue, setAssetValue] = useState('0');
   const [deroValue, setDeroValue] = useState('0');
   const [assetErrorMessage, setAssetErrorMessage] = useState<undefined | string>();
@@ -32,7 +27,7 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
   const [errorMessageTimeoutId, setErrorMessageTimeoutId] = useState<NodeJS.Timeout | undefined>(undefined);
   const [assetReserve, setAssetReserve] = useState<number | undefined>();
   const [deroReserve, setDeroReserve] = useState<number | undefined>();
-  const { tradingPairs, tradingPairsBalances } = useSwap();
+  const { tradingPairs, tradingPairsBalances, selectedPair } = useSwap();
   const [selectedPairPrice, setSelectedPairPrice] = useState<string | null>(null);
   const { walletInfo } = useNetwork();
 
