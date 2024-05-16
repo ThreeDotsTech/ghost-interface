@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode, useEffect, useCallback, useMemo } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect, useMemo } from 'react';
 import { to } from "dero-xswd-api";
 import { SwapContext, TradingPairBalances } from './Types';
 import { GHOST_EXCHANGE_SCID } from '../constants/addresses';

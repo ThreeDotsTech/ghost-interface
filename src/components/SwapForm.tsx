@@ -3,6 +3,8 @@ import { useSwap } from '../context/SwapContext';
 import { DERO_ATOMIC_UNIT_FACTOR } from '../constants/misc';
 import { atomicUnitsToString, validateAssetUnitsFormat } from '../utils';
 import { getInputPrice, getOutputPrice } from '../utils/swap';
+import { useNetwork } from '../context/NetworkContext';
+import { DERO_SCID } from '../constants/addresses';
 
 interface SwapFormProps {
   selectedPair: string | undefined;
@@ -32,6 +34,7 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
   const [deroReserve, setDeroReserve] = useState<number | undefined>();
   const { tradingPairs, tradingPairsBalances } = useSwap();
   const [selectedPairPrice, setSelectedPairPrice] = useState<string | null>(null);
+  const { walletInfo } = useNetwork();
 
   // Debounce function that takes a callback
   const debounce = (callback: () => void, delay = 500) => {
@@ -217,7 +220,7 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
 
   const assetInput = (
     <div>
-    <div className="flex gap-4 items-center">
+    <div className="flex gap-4 items-start">
       <input
         type="number"
         className="flex-1 p-3 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary placeholder-gray-400"
@@ -226,8 +229,9 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
         onChange={handleAssetInputChange}
         onFocus={(e) => e.target.select()}
       />
+      <div className="flex flex-col w-1/3">
       <select
-        className="w-1/3 p-3 border border-gray-300 rounded-md shadow-sm text-gray-700 focus:ring-primary focus:border-primary"
+        className="p-3 border border-gray-300 rounded-md shadow-sm text-gray-700 focus:ring-primary focus:border-primary"
         defaultValue={selectedPair}
         onChange={e => onPairSelect(e.target.value)}
       >
@@ -238,6 +242,10 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
           </option>
         ))}
       </select>
+      <div className=' text-sm text-gray-700 mt-1'>
+        {selectedPair && walletInfo.balances[selectedPair] ? "Balance: " + atomicUnitsToString(walletInfo.balances[selectedPair] as number) : ""}
+      </div>
+      </div>
     </div>
     {assetErrorMessage && (
         <p className="text-red-500 text-sm mt-1">{assetErrorMessage}</p>
@@ -247,7 +255,7 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
 
   const deroInput = (
     <div>
-      <div className="flex gap-4 items-center">
+      <div className="flex gap-4 items-start">
         <input
           type="number"
           className="flex-1 p-3 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary placeholder-gray-400"
@@ -256,8 +264,13 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
           onChange={handleDeroInputChange}
           onFocus={(e) => e.target.select()}
         />
-        <div className="w-1/3 p-3 border border-gray-300 rounded-md shadow-sm text-gray-700 focus:ring-primary focus:border-primary bg-gray-100">
+        <div className="flex flex-col w-1/3">
+        <div className="p-3 border border-gray-300 rounded-md shadow-sm text-gray-700 focus:ring-primary focus:border-primary bg-gray-100">
           DERO
+        </div>
+        <div className=' text-sm text-gray-700 mt-1'>
+        {typeof(walletInfo.balances[DERO_SCID]) === "number"  ? "Balance: " + atomicUnitsToString(walletInfo.balances[DERO_SCID] as number) : ""}
+      </div>
         </div>
       </div>
       {deroErrorMessage && (
@@ -268,11 +281,11 @@ const SwapForm: React.FC<SwapFormProps> = ({ selectedPair, onPairSelect }) => {
 
   return (
     <div className="flex-1 max-w-lg p-6 bg-white shadow-lg rounded-lg border border-gray-200">
-      <h1 className="text-xl font-semibold mb-6 text-gray-800">Ghost Exchange {selectedPairPrice}</h1>
-      <div className="space-y-6">
+      <h1 className="text-xl font-semibold mb-6 text-gray-800">Last Price: {selectedPairPrice} Đ</h1>
+      <div className="space-y-5">
         {direction === SwapDirection.ASSET_TO_DERO ? assetInput : deroInput}
         <button
-          className="mx-auto my-3 w-8 h-8 flex items-center justify-center text-primary cursor-pointer hover:text-accent transition-colors duration-200 ease-in-out"
+          className="mx-auto w-8 h-5 flex items-end justify-center text-primary cursor-pointer hover:text-accent transition-colors duration-200 ease-in-out"
           onClick={toggleDirection}
           aria-label="Change direction"
           style={{ background: 'none', border: 'none', outline: 'none' }}

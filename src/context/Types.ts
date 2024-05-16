@@ -8,7 +8,7 @@ export const ConnectionType = {
 export type ConnectionType = typeof ConnectionType[keyof typeof ConnectionType];
 
 export type WalletInfo = {
-    balance: number | null;
+  balances: { [key: string]: number | null | string};
 }
 
 export type NetworkContext = {
@@ -18,14 +18,14 @@ export type NetworkContext = {
   blockInfo: DEROGetInfoResult | null;
   initializeXswd: () => Promise<unknown>;
   disconnectXswd: () => void;
-  walletInfo: {
-    balance: number | null | string;
-}
+  walletInfo: WalletInfo;
   subscriptions: {
     new_topoheight: boolean | undefined;
     new_balance: boolean | undefined;
     new_entry: boolean | undefined;
   }
+  // TODO: Add allowances to show optional approvals when connecting wallet
+  // (GetAddress, GetTrackedAssets)
 }
 
 export type SwapContext = {
