@@ -15,4 +15,14 @@ export const validateAssetUnitsFormat = (assetUnits: string) => {
 export const atomicUnitsToString = (atomicUnits: number) => {
     const numberAsString = (atomicUnits * DERO_ATOMIC_UNIT_FACTOR).toFixed(5);
     return numberAsString;
+};
+
+// Compares two maps to check if they are equal
+export const isEqual = (obj1: any, obj2: any): boolean => {
+  if (typeof obj1 !== 'object' || typeof obj2 !== 'object') return obj1 === obj2;
+  if (Object.keys(obj1).length !== Object.keys(obj2).length) return false;
+  for (let key in obj1) {
+      if (!isEqual(obj1[key], obj2[key])) return false;
   }
+  return true;
+};

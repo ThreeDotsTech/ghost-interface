@@ -1,9 +1,9 @@
 import { createContext, useContext, useState, ReactNode, useEffect, useMemo, useCallback } from 'react';
-import { to } from "dero-xswd-api";
-import { SwapContext, TradingPairBalances } from './Types';
+import { gasEstimateSCArgs, to } from "dero-xswd-api";
+import { SwapContext, SwapDirection, SwapType, TradingPairBalances } from './Types';
 import { GHOST_EXCHANGE_SCID } from '../constants/addresses';
 import { useNetwork } from './NetworkContext';
-import { getAddressKeys } from '../utils';
+import { getAddressKeys, isEqual } from '../utils';
 
 const SwapContext = createContext<SwapContext | undefined>(undefined);
 
@@ -20,7 +20,7 @@ export const useSwap = () => {
 
 
 export const SwapProvider = ({ children }: { children: ReactNode }) => {
-    const {xswd} = useNetwork();
+    const {xswd, blockInfo} = useNetwork();
     const [tradingPairs, setTradingPairs] = useState<string[] | null>(null)
     const [balances, setBalances] = useState<TradingPairBalances>({});
     const [selectedPair, setSelectedPair] = useState<string | undefined>(undefined);
@@ -29,31 +29,32 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
         C: string;
     } | undefined>(undefined);
     
-
-    const  getContractInfo = () => {
+    // Get Ghost SC info.
+    const  getContractInfo = async () => {
         if (!xswd) return;
-        console.log("Getting SC")
-        xswd.node.GetSC(
+        const response = await xswd.node.GetSC(
             {
               scid: GHOST_EXCHANGE_SCID,
               code: false,
               variables: true,
-            }, false).then(
-                (response) => {
-                const [_, contract] = to<"daemon", "DERO.GetSC">(response);
-                const stringkeys = contract?.stringkeys;
+            }, false);
+        const [_, contract] = to<"daemon", "DERO.GetSC">(response);
+        const stringkeys = contract?.stringkeys;
 
-                setStringKeys(stringkeys);
-                if (stringkeys) {
-                    const addressKeys = getAddressKeys(stringkeys);
-                    setTradingPairs(addressKeys);
-                    console.log(addressKeys);
-                } else {
-                    setTradingPairs(null);
-                }
-            });      
+        setStringKeys(stringkeys);
+        if (stringkeys) {
+            const addressKeys = getAddressKeys(stringkeys);
+            if (JSON.stringify(tradingPairs && tradingPairs.sort()) !== JSON.stringify(addressKeys.sort())) {
+                console.log("Updating Trading Pairs")
+                setTradingPairs(addressKeys);
+            }
+            
+        } else {
+            setTradingPairs(null);
+        }      
     }
 
+    // Parses the contents of all balances keys from SC info.
     const fetchBalances = (addressKeys: string[]) => {
         if (!stringkeys) return;
         const newBalances: TradingPairBalances = {};
@@ -67,21 +68,138 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
                 dero: deroBalance as number ?? 0,
             };
         });
-        console.log(newBalances)
-        setBalances(newBalances);
+        if (!isEqual(balances, newBalances)) {
+            console.log("Balances updated.");
+            console.log(newBalances);
+            setBalances(newBalances);
+          }
     };
-
+    
+    //
     useEffect(() => {
-        if (tradingPairs) {
+        async function updateGhostBalances() {
+            if (!tradingPairs) return;
+            await getContractInfo();
             fetchBalances(tradingPairs);
         }
-    }, [tradingPairs, stringkeys]);
 
-    // Exposed to connect to Xswd
-    const executeTrade = useCallback(async () => {
+        updateGhostBalances()
+      }, [blockInfo, tradingPairs])
+
+
+
+    const executeTrade = useCallback(async (amount: number, swapDirection: SwapDirection, swapType: SwapType, counterAmount?: number) => {
         if (!xswd) return; // Early return if xswd is not set
+        if (!selectedPair) return; // A trading pair needs to be set
+        //TODO: Add slippage control, currently disabled by setting min amount to 1.
+        switch (swapType) {
+            case SwapType.INPUT:
+                //AssetToDeroSwapInput
+                if(swapDirection == SwapDirection.ASSET_TO_DERO){
 
-    }, [xswd]);
+                    const response = await xswd.wallet.transfer({
+                        scid: GHOST_EXCHANGE_SCID,
+                        transfers: [
+                            {
+                                scid: selectedPair,
+                                burn: amount,
+
+                            }
+                        ],
+                        sc_rpc: gasEstimateSCArgs(
+                            GHOST_EXCHANGE_SCID,
+                            "AssetToDeroSwapInput", [
+                                { name: "min_dero",  value: 1 },
+                                { name: "asset_address", value: selectedPair }
+                        ]),
+                        ringsize: 2,
+                        });
+            
+                    const [error, resultResponse] = to<"wallet", "transfer">(response);
+                    if (error){
+                        console.error(error)
+                    } else {
+                        console.log(resultResponse)
+                    }
+                //DeroToAssetSwapInput
+                } else {
+                    const response = await xswd.wallet.scinvoke({
+                        scid: GHOST_EXCHANGE_SCID,
+                        sc_dero_deposit: amount,
+                        sc_rpc: gasEstimateSCArgs(
+                            GHOST_EXCHANGE_SCID,
+                            "DeroToAssetSwapInput", 
+                            [
+                                { name: "asset_address", value: selectedPair }
+                        ]),
+                        ringsize: 2,
+                        });
+            
+                    const [error, resultResponse] = to<"wallet", "transfer">(response);
+                    if (error){
+                        console.error(error)
+                    } else {
+                        console.log(resultResponse)
+                    }
+                }
+              break;
+            case SwapType.OUTPUT:
+                //AssetToDeroSwapOutput
+                if(!counterAmount) throw Error("No input amount on output swap.")
+                if(swapDirection == SwapDirection.ASSET_TO_DERO){
+
+                    const response = await xswd.wallet.transfer({
+                        scid: GHOST_EXCHANGE_SCID,
+                        transfers: [
+                            {
+                                scid: selectedPair,
+                                burn: counterAmount,
+
+                            }
+                        ],
+                        sc_rpc: gasEstimateSCArgs(
+                            GHOST_EXCHANGE_SCID,
+                            "AssetToDeroSwapOutput", 
+                            [
+                                { name: "dero_bought",  value: amount },
+                                { name: "asset_address", value: selectedPair }
+                        ]),
+                        ringsize: 2,
+                        });
+            
+                    const [error, resultResponse] = to<"wallet", "transfer">(response);
+                    if (error){
+                        console.error(error)
+                    } else {
+                        console.log(resultResponse)
+                    }
+                //DeroToAssetSwapOutput
+            } else {
+                const response = await xswd.wallet.scinvoke({
+                    scid: GHOST_EXCHANGE_SCID,
+                    sc_dero_deposit: counterAmount,
+                    sc_rpc: gasEstimateSCArgs(
+                        GHOST_EXCHANGE_SCID,
+                        "DeroToAssetSwapOutput", 
+                        [
+                            { name: "assets_bought", value: amount },
+                            { name: "asset_address", value: selectedPair }
+                    ]),
+                    ringsize: 2,
+                    });
+        
+                const [error, resultResponse] = to<"wallet", "transfer">(response);
+                if (error){
+                    console.error(error)
+                } else {
+                    console.log(resultResponse)
+                }
+            }
+                break;
+            default:
+              break;
+          }
+    }, [xswd, selectedPair]);
 
     // Initialize Provider
     //TODO: Handle sad path.

@@ -17,7 +17,6 @@ function Swap() {
   }, [address, tradingPairs]);
 
   const handlePairClick = (pairAddress: string) => {
-    console.log('Selected pair')
     setSelectedPair(pairAddress);
     history.push(`/swap/${pairAddress}`);
   };

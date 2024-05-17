@@ -5,7 +5,7 @@ import { atomicUnitsToString, validateAssetUnitsFormat } from '../utils';
 import { getInputPrice, getOutputPrice } from '../utils/swap';
 import { useNetwork } from '../context/NetworkContext';
 import { DERO_SCID } from '../constants/addresses';
-import { SwapDirection } from '../context/Types';
+import { SwapDirection, SwapType } from '../context/Types';
 
 interface SwapFormProps {
   onPairSelect: (pair: string) => void;
@@ -27,7 +27,7 @@ const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
   const [errorMessageTimeoutId, setErrorMessageTimeoutId] = useState<NodeJS.Timeout | undefined>(undefined);
   const [assetReserve, setAssetReserve] = useState<number | undefined>();
   const [deroReserve, setDeroReserve] = useState<number | undefined>();
-  const { tradingPairs, tradingPairsBalances, selectedPair } = useSwap();
+  const { tradingPairs, tradingPairsBalances, selectedPair, executeTrade } = useSwap(); // Retrieve executeTrade
   const [selectedPairPrice, setSelectedPairPrice] = useState<string | null>(null);
   const { walletInfo } = useNetwork();
 
@@ -205,6 +205,20 @@ const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
     }
   };
 
+  //Recalculate values everytime the reserves update
+  useEffect(() => {
+    if (!assetReserve) return;
+    if(parseFloat(assetValue) == 0 && parseFloat(deroValue) == 0) return;
+    console.log("Recalculating values...")
+    if (lastInput === LastInput.ASSET){
+      console.log("Last was asset: ", assetValue);
+      handleAssetValueChange(assetValue);
+    } else{
+      console.log("Last was Dero:", deroValue)
+      handleDeroValueChange(deroValue);
+    }
+  }, [assetReserve]); // Could be any reserve
+
   // Cleanup
   useEffect(() => {
     return () => {
@@ -212,37 +226,47 @@ const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
       if (errorMessageTimeoutId) clearTimeout(errorMessageTimeoutId);
     };
   }, [inpuChangetTimeoutId]);
+  
+  // Handler for swap button click
+  const handleSwapButtonClick = () => {
+    const amount = Math.round(parseFloat(lastInput === LastInput.ASSET ? assetValue : deroValue) * (1 / DERO_ATOMIC_UNIT_FACTOR));
+    const swapType =  direction === SwapDirection.ASSET_TO_DERO ? 
+      lastInput === LastInput.ASSET ? SwapType.INPUT : SwapType.OUTPUT : 
+      lastInput === LastInput.DERO ? SwapType.INPUT : SwapType.OUTPUT;
+      const counterAmount = Math.round(parseFloat(lastInput === LastInput.ASSET ?  deroValue: assetValue) * (1 / DERO_ATOMIC_UNIT_FACTOR));
+    executeTrade(amount, direction, swapType, counterAmount);
+  };
 
   const assetInput = (
     <div>
-    <div className="flex gap-4 items-start">
-      <input
-        type="number"
-        className="flex-1 p-3 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary placeholder-gray-400"
-        placeholder="From Amount"
-        value={assetValue}
-        onChange={handleAssetInputChange}
-        onFocus={(e) => e.target.select()}
-      />
-      <div className="flex flex-col w-1/3">
-      <select
-        className="p-3 border border-gray-300 rounded-md shadow-sm text-gray-700 focus:ring-primary focus:border-primary"
-        defaultValue={selectedPair}
-        onChange={e => onPairSelect(e.target.value)}
-      >
-        <option disabled>Select Asset</option>
-        {tradingPairs?.map(pair => (
-          <option key={pair} value={pair}>
-            {pair.substring(0, 6)}...{pair.substring(pair.length - 4)}
-          </option>
-        ))}
-      </select>
-      <div className=' text-sm text-gray-700 mt-1'>
-        {selectedPair && walletInfo.balances[selectedPair] ? "Balance: " + atomicUnitsToString(walletInfo.balances[selectedPair] as number) : ""}
+      <div className="flex gap-4 items-start">
+        <input
+          type="number"
+          className="flex-1 p-3 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary placeholder-gray-400"
+          placeholder="From Amount"
+          value={assetValue}
+          onChange={handleAssetInputChange}
+          onFocus={(e) => e.target.select()}
+        />
+        <div className="flex flex-col w-1/3">
+          <select
+            className="p-3 border border-gray-300 rounded-md shadow-sm text-gray-700 focus:ring-primary focus:border-primary"
+            defaultValue={selectedPair}
+            onChange={e => onPairSelect(e.target.value)}
+          >
+            <option disabled>Select Asset</option>
+            {tradingPairs?.map(pair => (
+              <option key={pair} value={pair}>
+                {pair.substring(0, 6)}...{pair.substring(pair.length - 4)}
+              </option>
+            ))}
+          </select>
+          <div className=' text-sm text-gray-700 mt-1'>
+            {selectedPair && walletInfo.balances[selectedPair] ? "Balance: " + atomicUnitsToString(walletInfo.balances[selectedPair] as number) : ""}
+          </div>
+        </div>
       </div>
-      </div>
-    </div>
-    {assetErrorMessage && (
+      {assetErrorMessage && (
         <p className="text-red-500 text-sm mt-1">{assetErrorMessage}</p>
       )}
     </div>
@@ -260,12 +284,12 @@ const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
           onFocus={(e) => e.target.select()}
         />
         <div className="flex flex-col w-1/3">
-        <div className="p-3 border border-gray-300 rounded-md shadow-sm text-gray-700 focus:ring-primary focus:border-primary bg-gray-100">
-          DERO
-        </div>
-        <div className=' text-sm text-gray-700 mt-1'>
-        {typeof(walletInfo.balances[DERO_SCID]) === "number"  ? "Balance: " + atomicUnitsToString(walletInfo.balances[DERO_SCID] as number) : ""}
-      </div>
+          <div className="p-3 border border-gray-300 rounded-md shadow-sm text-gray-700 focus:ring-primary focus:border-primary bg-gray-100">
+            DERO
+          </div>
+          <div className=' text-sm text-gray-700 mt-1'>
+            {typeof(walletInfo.balances[DERO_SCID]) === "number" ? "Balance: " + atomicUnitsToString(walletInfo.balances[DERO_SCID] as number) : ""}
+          </div>
         </div>
       </div>
       {deroErrorMessage && (
@@ -290,7 +314,12 @@ const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
           </svg>
         </button>
         {direction === SwapDirection.ASSET_TO_DERO ? deroInput : assetInput}
-        <button className="w-full p-3 bg-primary text-white rounded-md shadow hover:bg-accent transition-colors duration-200 ease-in-out">Swap</button>
+        <button 
+          className="w-full p-3 bg-primary text-white rounded-md shadow hover:bg-accent transition-colors duration-200 ease-in-out" 
+          onClick={handleSwapButtonClick} // Attach handler to swap button
+        >
+          Swap
+        </button>
       </div>
     </div>
   );
