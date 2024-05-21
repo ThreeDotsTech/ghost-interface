@@ -75,7 +75,7 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
           }
     };
     
-    //
+    // Updates reserves every block
     useEffect(() => {
         async function updateGhostBalances() {
             if (!tradingPairs) return;
@@ -87,8 +87,8 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
       }, [blockInfo, tradingPairs])
 
 
-
-    const executeTrade = useCallback(async (amount: number, swapDirection: SwapDirection, swapType: SwapType, counterAmount?: number) => {
+    // Function exposed by provider to execute swaps on the current trading pair.
+    const executeTrade = useCallback(async (amount: number, swapDirection: SwapDirection, swapType: SwapType, counterAmount?: number): Promise<string | undefined> => {
         if (!xswd) return; // Early return if xswd is not set
         if (!selectedPair) return; // A trading pair needs to be set
         //TODO: Add slippage control, currently disabled by setting min amount to 1.
@@ -117,9 +117,9 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
             
                     const [error, resultResponse] = to<"wallet", "transfer">(response);
                     if (error){
-                        console.error(error)
+                        console.error(error);
                     } else {
-                        console.log(resultResponse)
+                        return resultResponse?.txid;
                     }
                 //DeroToAssetSwapInput
                 } else {
@@ -137,9 +137,9 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
             
                     const [error, resultResponse] = to<"wallet", "transfer">(response);
                     if (error){
-                        console.error(error)
+                        console.error(error);
                     } else {
-                        console.log(resultResponse)
+                        return resultResponse?.txid;
                     }
                 }
               break;
@@ -169,9 +169,9 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
             
                     const [error, resultResponse] = to<"wallet", "transfer">(response);
                     if (error){
-                        console.error(error)
+                        console.error(error);
                     } else {
-                        console.log(resultResponse)
+                        return resultResponse?.txid;
                     }
                 //DeroToAssetSwapOutput
             } else {
@@ -190,9 +190,9 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
         
                 const [error, resultResponse] = to<"wallet", "transfer">(response);
                 if (error){
-                    console.error(error)
+                    console.error(error);
                 } else {
-                    console.log(resultResponse)
+                    return resultResponse?.txid;
                 }
             }
                 break;
