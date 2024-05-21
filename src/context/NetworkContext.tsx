@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, ReactNode, useEffect, useCallback, useMemo } from 'react';
-import { Api, AppInfo, DEROGetInfoResult, EventType, Result, generateAppId, to } from "dero-xswd-api";
+import { createContext, useContext, useState, ReactNode, useEffect, useCallback, useMemo, useRef } from 'react';
+import { Api, AppInfo, DEROGetInfoResult, EventType, Result, generateAppId, sleep, to } from "dero-xswd-api";
 import { ConnectionType, NetworkContext } from './Types';
 import { DERO_SCID } from '../constants/addresses';
 
@@ -55,6 +55,7 @@ function getBlockInfo(api: Api, setBlockInfo: React.Dispatch<React.SetStateActio
 export const NetworkProvider = ({ children }: { children: ReactNode }) => {
   const [api, setApi] = useState<Api | null>(null);
   const [blockInfo, setBlockInfo] = useState<DEROGetInfoResult | null>(null);
+  const blockInfoRef = useRef<DEROGetInfoResult | null>(null);
   const [balances, setBalances] = useState<{ [key: string]: number | null | string }>({});
   const [intervalTimeout, setIntervalTimeout] = useState<NodeJS.Timeout | null>(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState<{
@@ -66,6 +67,10 @@ export const NetworkProvider = ({ children }: { children: ReactNode }) => {
     new_balance: undefined,
     new_entry: undefined,
   });
+
+  useEffect(() => {
+    blockInfoRef.current = blockInfo;
+  }, [blockInfo]);
 
   // Exposed to connect to Xswd
   const connectXswd = useCallback(async () => {
@@ -93,6 +98,48 @@ export const NetworkProvider = ({ children }: { children: ReactNode }) => {
       });
     }
   }, [api, intervalTimeout]);
+
+  // Function to check if a transaction is confirmed
+  // TODO: This can be done cleaner, possibly create an array of pending tx and confirmations expected
+  // Then check 
+  const isTransactionConfirmed = useCallback(async (txHash: string, confirmations: number = 0): Promise<boolean> => {
+    if (!api || !blockInfo?.height) {
+      console.error("API not initialized");
+      return false;
+    }
+
+    try {
+        var isConfirmed = false;
+        while (!isConfirmed) {
+          const response = await api.node.GetTransaction({
+            txs_hashes: [txHash],
+          });
+          const [error, result] = to<"daemon", "DERO.GetTransaction">(response);
+          if (error) {
+            console.error("Error fetching transaction:", error);
+            return false;
+          }
+          
+          const txBlockHeight = (result?.txs as any)[0].block_height;
+          const currentBlockHeight = blockInfoRef.current?.topoheight;
+
+          if (txBlockHeight === -1 || txBlockHeight === 0) {
+            await sleep(1000);
+            continue;
+          };
+
+          if (currentBlockHeight && txBlockHeight + confirmations <= currentBlockHeight) {
+            isConfirmed = true;
+          } else {
+            await sleep(1000);
+          }
+        }
+        return false;
+      } catch (error) {
+      console.error("Error checking transaction confirmation:", error);
+      return false;
+    }
+  }, [api, blockInfo]);
 
   // Handle subscriptions
   useEffect(() => {
@@ -179,6 +226,7 @@ export const NetworkProvider = ({ children }: { children: ReactNode }) => {
         blockInfo,
         initializeXswd: connectXswd,
         disconnectXswd,
+        isTransactionConfirmed,
         walletInfo: {
           balances
         },
