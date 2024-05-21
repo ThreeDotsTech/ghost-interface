@@ -29,7 +29,9 @@ const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
   const [deroReserve, setDeroReserve] = useState<number | undefined>();
   const { tradingPairs, tradingPairsBalances, selectedPair, executeTrade } = useSwap(); // Retrieve executeTrade
   const [selectedPairPrice, setSelectedPairPrice] = useState<string | null>(null);
-  const { walletInfo } = useNetwork();
+  const { walletInfo, xswd, isTransactionConfirmed } = useNetwork();
+
+  const [swapButtonDisabled, setSwapButtonDisabled] = useState<boolean>(false);
 
   // Debounce function that takes a callback
   const debounce = (callback: () => void, delay = 500) => {
@@ -228,13 +230,18 @@ const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
   }, [inpuChangetTimeoutId]);
   
   // Handler for swap button click
-  const handleSwapButtonClick = () => {
+  const handleSwapButtonClick = async () => {
+    if (!xswd) return;
     const amount = Math.round(parseFloat(lastInput === LastInput.ASSET ? assetValue : deroValue) * (1 / DERO_ATOMIC_UNIT_FACTOR));
     const swapType =  direction === SwapDirection.ASSET_TO_DERO ? 
       lastInput === LastInput.ASSET ? SwapType.INPUT : SwapType.OUTPUT : 
       lastInput === LastInput.DERO ? SwapType.INPUT : SwapType.OUTPUT;
       const counterAmount = Math.round(parseFloat(lastInput === LastInput.ASSET ?  deroValue: assetValue) * (1 / DERO_ATOMIC_UNIT_FACTOR));
-    executeTrade(amount, direction, swapType, counterAmount);
+    const txid = await executeTrade(amount, direction, swapType, counterAmount);
+    if (!txid) return;
+    setSwapButtonDisabled(true);
+    await isTransactionConfirmed(txid);
+    setSwapButtonDisabled(false);
   };
 
   const assetInput = (
@@ -315,10 +322,11 @@ const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
         </button>
         {direction === SwapDirection.ASSET_TO_DERO ? deroInput : assetInput}
         <button 
-          className="w-full p-3 bg-primary text-white rounded-md shadow hover:bg-accent transition-colors duration-200 ease-in-out" 
+          disabled={swapButtonDisabled}
+          className="w-full p-3 bg-primary disabled:bg-slate-400 disabled:hover:bg-slate-400 disabled:hover:cursor-wait text-white rounded-md shadow hover:bg-accent transition-colors duration-200 ease-in-out" 
           onClick={handleSwapButtonClick} // Attach handler to swap button
         >
-          Swap
+          {swapButtonDisabled ? "Waiting for Tx" : "Swap"}
         </button>
       </div>
     </div>
