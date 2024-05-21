@@ -28,6 +28,7 @@ export type NetworkContext = {
   blockInfo: DEROGetInfoResult | null;
   initializeXswd: () => Promise<unknown>;
   disconnectXswd: () => void;
+  isTransactionConfirmed: (txHash: string, confirmations?: number) => Promise<boolean>;
   walletInfo: WalletInfo;
   subscriptions: {
     new_topoheight: boolean | undefined;
@@ -43,7 +44,7 @@ export type SwapContext = {
   tradingPairsBalances: TradingPairBalances | null;
   selectedPair: string | undefined;
   setSelectedPair: React.Dispatch<React.SetStateAction<string | undefined>>;
-  executeTrade: (amount: number, swapDirection: SwapDirection, swapType: SwapType, counterAmount?: number) => Promise<void>;
+  executeTrade: (amount: number, swapDirection: SwapDirection, swapType: SwapType, counterAmount?: number) => Promise<string | undefined>;
 }
 
 export type TradingPairBalances = {
