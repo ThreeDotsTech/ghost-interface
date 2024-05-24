@@ -1,5 +1,5 @@
-import { useNetwork } from "../context/NetworkContext";
-import { useTheme } from '../context/ThemeContext'; 
+import { useNetwork } from "../../context/NetworkContext";
+import { useTheme } from '../../context/ThemeContext'; 
 
 function Footer() {
   const { isConnected, connectionType, blockInfo } = useNetwork();

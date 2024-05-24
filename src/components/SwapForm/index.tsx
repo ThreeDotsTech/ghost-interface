@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { useSwap } from '../context/SwapContext';
-import { DERO_ATOMIC_UNIT_FACTOR } from '../constants/misc';
-import { atomicUnitsToString, validateAssetUnitsFormat } from '../utils';
-import { getInputPrice, getOutputPrice } from '../utils/swap';
-import { useNetwork } from '../context/NetworkContext';
-import { DERO_SCID } from '../constants/addresses';
-import { SwapDirection, SwapType } from '../context/Types';
+import { useSwap } from '../../context/SwapContext';
+import { DERO_ATOMIC_UNIT_FACTOR } from '../../constants/misc';
+import { atomicUnitsToString, validateAssetUnitsFormat } from '../../utils';
+import { getInputPrice, getOutputPrice } from '../../utils/swap';
+import { useNetwork } from '../../context/NetworkContext';
+import { DERO_SCID } from '../../constants/addresses';
+import { SwapDirection, SwapType } from '../../context/Types';
 
 interface SwapFormProps {
   onPairSelect: (pair: string) => void;

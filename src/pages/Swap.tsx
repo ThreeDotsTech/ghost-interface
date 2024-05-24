@@ -22,12 +22,12 @@ function Swap() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row items-center justify-center bg-background text-text p-4">
-      <div className="flex-1 max-w-md lg:max-w-lg mx-auto mb-8 lg:mb-0 lg:mr-8">
-        <SwapForm  onPairSelect={handlePairClick} />
+    <div className="min-h-screen flex flex-col md:flex-row items-center justify-start bg-background text-text pr-4">
+      <div className="hidden md:flex sm">
+        <TradingPairsList tradingPairs={["ee300fe87cf9fb3bd600b25d6af4cd54569022a3fa264a1cb20174bb9ef7afa2","ee300fe87cf9fb3bd600b25d6af4cd54569022a3fa264a1cb20174bb9ef7afa3","ee300fe87cf9fb3bd600b25d6af4cd54569022a3fa264a1cb20174bb9ef7afa3"]} onSelectPair={handlePairClick} />
       </div>
-      <div className="w-full max-w-xs lg:max-w-sm mx-auto">
-        <TradingPairsList tradingPairs={tradingPairs} onSelectPair={handlePairClick} />
+      <div className="flex w-full items-center justify-center">
+        <SwapForm  onPairSelect={handlePairClick} />
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { useModal } from '../context/ModalContext';
+import { useModal } from '../../context/ModalContext';
 
 const Modal: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { hideModal } = useModal();

@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { ConnectionState, to } from 'dero-xswd-api';
-import { useNetwork } from '../context/NetworkContext';
-import { useModal } from '../context/ModalContext';
-import WalletConnectModalContent from './WalletConnectModalContent';
-import { DERO_SCID } from '../constants/addresses';
-import { atomicUnitsToString } from '../utils';
+import { useNetwork } from '../../context/NetworkContext';
+import { useModal } from '../../context/ModalContext';
+import WalletConnectModalContent from '../WalletConnectModalContent';
+import { DERO_SCID } from '../../constants/addresses';
+import { atomicUnitsToString } from '../../utils';
 
 function Header() {
   const { xswd, connectionType, disconnectXswd, walletInfo } = useNetwork();

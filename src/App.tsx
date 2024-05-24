@@ -2,8 +2,8 @@ import { Route } from "react-router-dom";
 
 import { Home } from "./pages/Home";
 import Swap from "./pages/Swap";
-import Header from "./components/Header";
 import Footer from "./components/Footer";
+import Header from "./components/Header";
 
 function App() {
   return (

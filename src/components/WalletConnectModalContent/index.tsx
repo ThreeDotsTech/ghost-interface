@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
-import Spinner from './Spinner';
-import { useNetwork } from '../context/NetworkContext';
+import Spinner from '../Spinner';
+import { useNetwork } from '../../context/NetworkContext';
 
 const WalletConnectModalContent: React.FC<{ hideModal: () => void }> = ({ hideModal })  => {
     const { xswd, initializeXswd, subscriptions } = useNetwork();
