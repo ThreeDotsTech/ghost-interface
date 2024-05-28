@@ -3,7 +3,7 @@ const plugin = require('tailwindcss/plugin');
 module.exports = {
   content: [
     "./index.html",
-    "./src/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx,jsx,js}",
   ],
   theme: {
     extend: {
@@ -16,34 +16,47 @@ module.exports = {
         border: 'var(--color-border)',
         shadows: 'var(--color-shadows)',
       },
-      boxShadow: {
-        neu: '8px 8px 0px 0px rgba(0, 0, 0, 1)', // Custom shadow for neubrutalism
-        'neu-hover': '12px 12px 0px 0px rgba(0, 0, 0, 1)', // Hover shadow for neubrutalism
-        'neu-active': '4px 4px 0px 0px rgba(0, 0, 0, 1)', 
-      },
-    },
+    }
   },
   plugins: [
-    plugin(function({ addUtilities, theme, e }) {
+    plugin(function({ addUtilities, e, theme, variants }) {
       const colors = theme('colors');
-      const newUtilities = Object.entries(colors).reduce((acc, [colorName, colorValue]) => {
-        if (typeof colorValue === 'string') {
-          return {
-            ...acc,
-            [`.shadow-neu-${e(colorName)}`]: {
-              boxShadow: `8px 8px 0px 0px ${colorValue}`,
-            },
-            [`.hover\\:shadow-neu-${e(colorName)}`]: {
-              '&:hover': {
-                boxShadow: `12px 12px 0px 0px ${colorValue}`,
-              },
+      const boxShadowUtilities = {};
+
+      Object.keys(colors).forEach(colorName => {
+        const color = colors[colorName];
+
+        if (typeof color === 'string') {
+          boxShadowUtilities[`.${e(`shadow-neu-${colorName}`)}`] = {
+            boxShadow: `8px 8px 0 0 ${color}`,
+            transition: 'box-shadow 0.2s ease-in-out',
+            '&:hover': {
+              boxShadow: `12px 12px 0 0 ${color}`,
+              transition: 'box-shadow 0.2s ease-in-out',
             },
           };
+          boxShadowUtilities[`.${e(`shadow-neu-active-${colorName}`)}`] = {
+              boxShadow: `4px 4px 0 0 ${color}`,
+              transition: 'box-shadow 0.2s ease-in-out',
+          };
+        } else {
+          Object.keys(color).forEach(shade => {
+            boxShadowUtilities[`.${e(`shadow-neu-${colorName}-${shade}`)}`] = {
+              boxShadow: `8px 8px 0 0 ${color[shade]}`,
+              transition: 'box-shadow 0.2s ease-in-out',
+              '&:hover': {
+                boxShadow: `12px 12px 0 0 ${color[shade]}`,
+                transition: 'box-shadow 0.2s ease-in-out',
+              },
+            };
+            boxShadowUtilities[`.${e(`shadow-neu-active-${colorName}-${shade}`)}`] = {
+                boxShadow: `4px 4px 0 0 ${color[shade]}`,
+                transition: 'box-shadow 0.2s ease-in-out',
+            };
+          });
         }
-        return acc;
-      }, {});
-
-      addUtilities(newUtilities, ['responsive', 'hover']);
+      });
+      addUtilities(boxShadowUtilities, variants('boxShadow'));
     }),
   ],
-}
+};

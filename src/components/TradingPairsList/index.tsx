@@ -40,7 +40,7 @@ const TradingPairsList: React.FC<TradingPairsListProps> = ({ tradingPairs, onSel
         ))}
         <li
           key={"add-pair"}
-          className="cursor-pointer border-y-4 border-r-4 pl-6 py-3 rounded-r-md border-accent shadow-neu-accent"
+          className="cursor-pointer border-y-4 border-r-4 pl-6 py-3 rounded-r-md border-accent shadow-neu-accent text-black"
           title={"Create pair"}
           onClick={handleCreatePairClick}
         >
