@@ -28,10 +28,10 @@ module.exports = {
 
         if (typeof color === 'string') {
           boxShadowUtilities[`.${e(`shadow-neu-${colorName}`)}`] = {
-            boxShadow: `8px 8px 0 0 ${color}`,
+            boxShadow: `6px 6px 0 0 ${color}`,
             transition: 'box-shadow 0.2s ease-in-out',
             '&:hover': {
-              boxShadow: `12px 12px 0 0 ${color}`,
+              boxShadow: `8px 8px 0 0 ${color}`,
               transition: 'box-shadow 0.2s ease-in-out',
             },
           };
@@ -42,10 +42,10 @@ module.exports = {
         } else {
           Object.keys(color).forEach(shade => {
             boxShadowUtilities[`.${e(`shadow-neu-${colorName}-${shade}`)}`] = {
-              boxShadow: `8px 8px 0 0 ${color[shade]}`,
+              boxShadow: `6px 6px 0 0 ${color[shade]}`,
               transition: 'box-shadow 0.2s ease-in-out',
               '&:hover': {
-                boxShadow: `12px 12px 0 0 ${color[shade]}`,
+                boxShadow: `8px 8px 0 0 ${color[shade]}`,
                 transition: 'box-shadow 0.2s ease-in-out',
               },
             };
@@ -58,5 +58,20 @@ module.exports = {
       });
       addUtilities(boxShadowUtilities, variants('boxShadow'));
     }),
+    function({ addUtilities }) {
+      addUtilities({
+        '.hide-arrows::-webkit-outer-spin-button': {
+          '-webkit-appearance': 'none',
+          'margin': '0',
+        },
+        '.hide-arrows::-webkit-inner-spin-button': {
+          '-webkit-appearance': 'none',
+          'margin': '0',
+        },
+        '.hide-arrows': {
+          '-moz-appearance': 'textfield', // Firefox
+        },
+      });
+    },
   ],
 };

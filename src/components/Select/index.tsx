@@ -19,7 +19,8 @@ const Select: React.FC<SelectProps> = ({
 }) => {
     const baseClasses = `
         w-full
-        p-3
+        px-2
+        py-4
         border-4 border-black
         shadow-neu-black
         bg-white

@@ -17,6 +17,10 @@ export const atomicUnitsToString = (atomicUnits: number) => {
     return numberAsString;
 };
 
+export const truncateAddress = (address: string) => {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+};
+
 // Compares two maps to check if they are equal
 export const isEqual = (obj1: any, obj2: any): boolean => {
   if (typeof obj1 !== 'object' || typeof obj2 !== 'object') return obj1 === obj2;

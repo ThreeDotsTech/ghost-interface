@@ -9,6 +9,7 @@ import { SwapDirection, SwapType } from '../../context/Types';
 import PrimaryButton from '../PrimaryButton';
 import InputField from '../InputField';
 import Select from '../Select';
+import ConnectWalletButton from '../ConnectWalletButton';
 
 interface SwapFormProps {
   onPairSelect: (pair: string) => void;
@@ -32,7 +33,7 @@ const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
   const [deroReserve, setDeroReserve] = useState<number | undefined>();
   const { tradingPairs, tradingPairsBalances, selectedPair, executeTrade } = useSwap(); // Retrieve executeTrade
   const [selectedPairPrice, setSelectedPairPrice] = useState<string | null>(null);
-  const { walletInfo, xswd, isTransactionConfirmed } = useNetwork();
+  const { walletInfo, xswd, connectionType, isTransactionConfirmed } = useNetwork();
 
   const [swapButtonDisabled, setSwapButtonDisabled] = useState<boolean>(false);
 
@@ -243,23 +244,23 @@ const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
     const txid = await executeTrade(amount, direction, swapType, counterAmount);
     if (!txid) return;
     setSwapButtonDisabled(true);
-    await isTransactionConfirmed(txid);
+    await isTransactionConfirmed(txid, 1);
     setSwapButtonDisabled(false);
   };
 
   const assetInput = (
     <div>
-      <div className="flex gap-4 items-start">
+      <div className="flex gap-4 items-start m-3">
         <InputField
           type="number"
-          additionalClasses='flex-1'
+          additionalClasses='flex-1 py-4'
           //className="flex-1 p-3 border border-gray-300 text-black rounded-md shadow-sm focus:ring-primary focus:border-primary placeholder-gray-400"
           placeholder="From Amount"
           value={assetValue}
           onChange={handleAssetInputChange}
           onFocus={(e) => e.target.select()}
         />
-        <div className="flex flex-col w-1/3">
+        <div className="flex flex-col w-5/12">
           <Select
             //className="p-3 border border-gray-300 rounded-md shadow-sm text-gray-700 focus:ring-primary focus:border-primary"
             value={selectedPair ?? ''}
@@ -268,7 +269,7 @@ const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
             }}
             options={tradingPairs ?? []}
           />
-          <div className=' text-sm text-gray-700 mt-1'>
+          <div className='pl-1 mt-2 text-sm text-gray-700'>
             {selectedPair && walletInfo.balances[selectedPair] ? "Balance: " + atomicUnitsToString(walletInfo.balances[selectedPair] as number) : ""}
           </div>
         </div>
@@ -281,21 +282,21 @@ const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
 
   const deroInput = (
     <div>
-      <div className="flex gap-4 items-start">
+      <div className="flex gap-4 items-start m-3">
         <InputField
           type="number"
-          additionalClasses='flex-1'
+          additionalClasses='flex-1 py-4'
           //className="flex-1 p-3 border border-gray-300 text-black rounded-md shadow-sm focus:ring-primary focus:border-primary placeholder-gray-400"
           placeholder="To Amount"
           value={deroValue}
           onChange={handleDeroInputChange}
           onFocus={(e) => e.target.select()}
         />
-        <div className="flex flex-col w-1/3">
-          <div className="p-3 border-4 border-black shadow-neu-black">
+        <div className="flex flex-col w-5/12">
+          <div className="py-4 px-2 border-4 border-black shadow-neu-black">
             DERO
           </div>
-          <div className=' text-sm text-gray-700 mt-1'>
+          <div className='pl-1 mt-2 text-sm text-gray-700'>
             {typeof(walletInfo.balances[DERO_SCID]) === "number" ? "Balance: " + atomicUnitsToString(walletInfo.balances[DERO_SCID] as number) : ""}
           </div>
         </div>
@@ -308,7 +309,7 @@ const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
 
   return (
     <div className="flex-1 max-w-lg p-6 border-4 bg-white border-black shadow-neu-black">
-      <div className="space-y-5 my-5">
+      <div className="space-y-4 my-3">
         {direction === SwapDirection.ASSET_TO_DERO ? assetInput : deroInput}
         <button
           className="mx-auto w-8 h-5 flex items-end justify-center text-primary cursor-pointer hover:text-accent transition-colors duration-200 ease-in-out"
@@ -321,14 +322,18 @@ const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
           </svg>
         </button>
         {direction === SwapDirection.ASSET_TO_DERO ? deroInput : assetInput}
-        <PrimaryButton 
-          disabled={swapButtonDisabled}
-          additionalClasses ={"w-full"}
-          //className="w-full p-3 bg-primary disabled:bg-slate-400 disabled:hover:bg-slate-400 disabled:hover:cursor-wait text-white rounded-md shadow hover:bg-accent transition-colors duration-200 ease-in-out" 
-          onClick={handleSwapButtonClick} // Attach handler to swap button
-        >
-          {swapButtonDisabled ? "Waiting for Tx" : "Swap"}
-        </PrimaryButton>
+        { connectionType === 'XSWD' ? 
+            <PrimaryButton 
+            disabled={swapButtonDisabled}
+            additionalClasses ={"w-full"}
+            //className="w-full p-3 bg-primary disabled:bg-slate-400 disabled:hover:bg-slate-400 disabled:hover:cursor-wait text-white rounded-md shadow hover:bg-accent transition-colors duration-200 ease-in-out" 
+            onClick={handleSwapButtonClick} // Attach handler to swap button
+          >
+            {swapButtonDisabled ? "Waiting for Tx" : "Swap"}
+          </PrimaryButton>
+            : <ConnectWalletButton additionalClasses='py-2 w-full'/>
+          }
+        
       </div>
     </div>
   );

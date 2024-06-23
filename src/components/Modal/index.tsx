@@ -19,7 +19,7 @@ const Modal: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }, [hideModal]);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-20">
       <div ref={modalRef}>
         {children}
       </div>

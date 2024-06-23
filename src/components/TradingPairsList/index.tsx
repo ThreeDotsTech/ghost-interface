@@ -2,10 +2,12 @@ import React from 'react';
 import { useSwap } from '../../context/SwapContext';
 import { useModal } from '../../context/ModalContext';
 import CreateTradingPairModalContent from '../CreatePairModalContent';
+import ManageLiquidityModalContent from '../ManageLiquidityModalContent';
+import TradingPairListButton from '../TradingPairListButton';
 
 interface TradingPairsListProps {
   tradingPairs: string[] | null;
-  onSelectPair: (pair: string) => void;
+  onSelectPair: (pair: string | undefined) => void;
 }
 
 const TradingPairsList: React.FC<TradingPairsListProps> = ({ tradingPairs, onSelectPair }) => {
@@ -13,34 +15,29 @@ const TradingPairsList: React.FC<TradingPairsListProps> = ({ tradingPairs, onSel
   const { showModal, hideModal } = useModal();
 
   const handleCreatePairClick = () => {
-      showModal(<CreateTradingPairModalContent hideModal={hideModal}/>)
+    showModal(<CreateTradingPairModalContent hideModal={hideModal} />);
+  };
 
+  const handleManageLiquidityClick = (pair: string) => {
+    showModal(<ManageLiquidityModalContent pair={pair} hideModal={hideModal} />);
   };
 
   return (
-    <div className="pr-6 py-4 mr-10 w-72 bg-white shadow-lg rounded-r-lg border border-gray-200">
+    <div className="pt-4 pb-6 w-72 bg-white shadow-lg border-y-4 border-l-4 border-black">
       <h2 className="text-xl font-semibold mb-4 text-gray-800 pl-6">Trading Pairs</h2>
       <ul className="space-y-4">
         {tradingPairs?.map(pair => (
-          <li
-          className={`cursor-pointer border-y-4 border-r-4 border-black pl-6 py-3 truncate rounded-r-md shadow-neu-black hover:shadow-neu-black  transition-all duration-200 ${
-            selectedPair === pair
-              ? 'text-white bg-primary shadow-neu-active-black'
-              : 'text-black bg-white hover:bg-gray-200'
-          }`}
+          <TradingPairListButton
             key={pair}
-            onClick={() => onSelectPair(pair)}
-            title={pair}
-          >
-            <a  >
-              {pair.substring(0, 6)}...{pair.substring(pair.length - 4)}
-            </a>
-            
-          </li>
+            pair={pair}
+            selectedPair={selectedPair}
+            onSelectPair={onSelectPair}
+            onManageLiquidityClick={handleManageLiquidityClick}
+          />
         ))}
         <li
           key={"add-pair"}
-          className="cursor-pointer border-y-4 border-r-4 pl-6 py-3 rounded-r-md border-accent shadow-neu-accent text-black"
+          className="ml-4 cursor-pointer border-y-4 border-l-4 pl-6 py-3 rounded-l-xl border-accent shadow-neu-accent text-black"
           title={"Create pair"}
           onClick={handleCreatePairClick}
         >
