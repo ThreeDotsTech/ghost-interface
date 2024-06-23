@@ -136,8 +136,6 @@ End Function
 // {input_reserve} Amount of DERO or Assets (input type) in exchange reserves.
 // {output_reserve} Amount of DERO or Assets (output type) in exchange reserves.
 Function getOutputPrice(output_amount Uint64, input_reserve Uint64, output_reserve Uint64) Uint64
-    10 IF input_reserve > 0 && output_reserve > 0 && output_reserve > output_amount THEN GOTO 30
-    20 PANIC
     30 RETURN mult_div(input_reserve * 1000, output_amount, (output_reserve - output_amount) * 997 + 1)
 End Function
 
@@ -181,6 +179,8 @@ Function deroToAssetOutput(assets_bought Uint64, max_dero Uint64, asset_address 
     30 DIM asset_reserve, dero_reserve, dero_sold, dero_refund as Uint64
     40 LET asset_reserve = get_asset_reserve(asset_address)
     41 LET dero_reserve = get_dero_reserve_per_asset(asset_address)
+    42 IF dero_reserve > 0 && asset_reserve > 0 && asset_reserve > assets_bought THEN GOTO 50
+    43 RETURN 1
     50 LET dero_sold = getOutputPrice(assets_bought, dero_reserve, asset_reserve)
     60 IF dero_sold > max_dero THEN GOTO 61 ELSE GOTO 70
     61 RETURN 1
@@ -231,9 +231,12 @@ End Function
 Function assetToDeroOutput(dero_bought Uint64, max_assets Uint64 , asset_address String) Uint64
     10 IF  dero_bought > 0 THEN GOTO 30
     20 RETURN 1
-    30 DIM asset_reserve, assets_sold, asset_refund as Uint64
+    30 DIM asset_reserve, dero_reserve, assets_sold, asset_refund as Uint64
     40 LET asset_reserve = get_asset_reserve(asset_address)
-    50 LET assets_sold = getOutputPrice(dero_bought, asset_reserve, get_dero_reserve_per_asset(asset_address))
+    41 LET dero_reserve = get_dero_reserve_per_asset(asset_address)
+    42 IF asset_reserve > 0 && dero_reserve > 0 && dero_reserve > dero_bought THEN GOTO 50
+    43 RETURN 1
+    50 LET assets_sold = getOutputPrice(dero_bought, asset_reserve, dero_reserve)
     // assets_sold is always > zero
     60 IF max_assets >= assets_sold THEN GOTO 80
     70 RETURN 1
@@ -241,7 +244,7 @@ Function assetToDeroOutput(dero_bought Uint64, max_assets Uint64 , asset_address
     90 LET asset_refund = max_assets - assets_sold
    100 IF asset_refund == 0 THEN GOTO 120
    110 SEND_ASSET_TO_ADDRESS(SIGNER(), asset_refund, HEXDECODE(asset_address))
-   120 set_dero_reserve_per_asset(get_dero_reserve_per_asset(asset_address) - dero_bought, asset_address)
+   120 set_dero_reserve_per_asset(dero_reserve - dero_bought, asset_address)
    130 set_asset_reserve(asset_reserve + assets_sold, asset_address)
    140 RETURN 0
 End Function
