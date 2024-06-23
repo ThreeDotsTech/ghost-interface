@@ -124,14 +124,14 @@ End Function
 // {input_reserve} Amount of DERO or Assets (input type) in exchange reserves.
 // {output_reserve} Amount of DERO or Assets (output type) in exchange reserves.
 Function getInputPrice(input_amount Uint64, input_reserve Uint64, output_reserve Uint64) Uint64
-    01 DIM SYS_MAX_VALUE as Uint64
-    02 LET SYS_MAX_VALUE = 18446744073709551
-    10 IF input_reserve > 0 && output_reserve > 0 && input_amount <= SYS_MAX_VALUE THEN GOTO 30
-    20 PANIC
+    '01 DIM SYS_MAX_VALUE as Uint64
+    '02 LET SYS_MAX_VALUE = 18446744073709551
+    '10 IF input_reserve > 0 && output_reserve > 0 && input_amount <= SYS_MAX_VALUE THEN GOTO 30
+    '20 PANIC
     30 DIM input_amount_with_fee as Uint64
     40 LET input_amount_with_fee = input_amount * 997
     50 IF will_addition_overflow(input_reserve * 1000, input_amount * 1000) == 0 THEN GOTO 70
-    60 PANIC // Infinite supply token attack
+    60 PANIC // Infinite supply token attack, attackers assets can burn in hell
     70 RETURN mult_div(input_amount_with_fee, output_reserve, (input_reserve * 1000) + input_amount_with_fee)
 End Function
 
@@ -148,9 +148,12 @@ End Function
 Function deroToAssetInput(dero_sold Uint64, min_assets Uint64, asset_address String) Uint64
     10 IF  (dero_sold > 0 && min_assets > 0) THEN GOTO 30
     20 RETURN 1
-    30 DIM assets_bought, asset_reserve, dero_reserve as Uint64
+    30 DIM assets_bought, asset_reserve, dero_reserve, SYS_MAX_VALUE as Uint64
     40 LET asset_reserve = get_asset_reserve(asset_address)
     50 LET dero_reserve = get_dero_reserve_per_asset(asset_address)
+    51 LET SYS_MAX_VALUE = 18446744073709551
+    52 IF dero_reserve > 0 && asset_reserve > 0 && dero_sold <= SYS_MAX_VALUE THEN GOTO 60
+    53 RETURN 1
     60 LET assets_bought = getInputPrice(dero_sold, dero_reserve, asset_reserve)
     70 IF assets_bought >= min_assets THEN GOTO 90
     80 RETURN 1
@@ -205,13 +208,17 @@ End Function
 Function assetToDeroInput(assets_sold Uint64, min_dero Uint64, asset_address String) Uint64
     10 IF (assets_sold > 0 && min_dero > 0) THEN GOTO 30
     20 RETURN 1
-    30 DIM asset_reserve, dero_bought as Uint64
+    30 DIM asset_reserve, dero_reserve, dero_bought, SYS_MAX_VALUE as Uint64
     40 LET asset_reserve = get_asset_reserve(asset_address)
-    50 LET dero_bought = getInputPrice(assets_sold, asset_reserve, get_dero_reserve_per_asset(asset_address))
+    41 LET dero_reserve = get_dero_reserve_per_asset(asset_address)
+    42 LET SYS_MAX_VALUE = 18446744073709551
+    43 IF asset_reserve > 0 && dero_reserve > 0 && assets_sold <= SYS_MAX_VALUE THEN GOTO 50
+    44 RETURN 1
+    50 LET dero_bought = getInputPrice(assets_sold, asset_reserve, dero_reserve)
     60 IF dero_bought >= min_dero THEN GOTO 80
     70 RETURN 1
     80 SEND_DERO_TO_ADDRESS(SIGNER(),dero_bought)
-    90 set_dero_reserve_per_asset(get_dero_reserve_per_asset(asset_address) - dero_bought, asset_address)
+    90 set_dero_reserve_per_asset(dero_reserve - dero_bought, asset_address)
    100 set_asset_reserve(asset_reserve + assets_sold, asset_address)
    110 RETURN 0
 End Function
