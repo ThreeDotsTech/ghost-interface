@@ -24,7 +24,7 @@ function Swap() {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row items-center justify-center md:justify-start bg-background text-text -z-50">
-      <div className="relative w-full flex items-center justify-center z-10">
+      <div className="relative w-full flex items-center justify-center z-10 mt-20 xl:mt-10">
         <div className="relative">
           <SwapForm onPairSelect={handlePairClick}/>
           <img
@@ -34,7 +34,7 @@ function Swap() {
           />
         </div>
       </div>
-      <div className="hidden md:flex sm">
+      <div className="hidden md:flex sm mt-20 xl:mt-10">
         <TradingPairsList tradingPairs={["ee300fe87cf9fb3bd600b25d6af4cd54569022a3fa264a1cb20174bb9ef7afa2","ee300fe87cf9fb3bd600b25d6af4cd54569022a3fa264a1cb20174bb9ef7afa3","ee300fe87cf9fb3bd600b25d6af4cd54569022a3fa264a1cb20174bb9ef7afa3"]} onSelectPair={handlePairClick} />
       </div>
     </div>
