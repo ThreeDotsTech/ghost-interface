@@ -147,13 +147,13 @@ End Function
 
 Function deroToAssetInput(dero_sold Uint64, min_assets Uint64, asset_address String) Uint64
     10 IF  (dero_sold > 0 && min_assets > 0) THEN GOTO 30
-    20 PANIC
+    20 RETURN 1
     30 DIM assets_bought, asset_reserve, dero_reserve as Uint64
     40 LET asset_reserve = get_asset_reserve(asset_address)
     50 LET dero_reserve = get_dero_reserve_per_asset(asset_address)
     60 LET assets_bought = getInputPrice(dero_sold, dero_reserve, asset_reserve)
     70 IF assets_bought >= min_assets THEN GOTO 90
-    80 PANIC
+    80 RETURN 1
     90 SEND_ASSET_TO_ADDRESS(SIGNER(), assets_bought, HEXDECODE(asset_address))
    100 set_asset_reserve(asset_reserve - assets_bought, asset_address)
    110 set_dero_reserve_per_asset(dero_reserve + dero_sold, asset_address)
@@ -178,13 +178,13 @@ End Function
 
 Function deroToAssetOutput(assets_bought Uint64, max_dero Uint64, asset_address String) Uint64
     10 IF (assets_bought > 0 && max_dero > 0) THEN GOTO 30
-    20 PANIC
+    20 RETURN 1
     30 DIM asset_reserve, dero_reserve, dero_sold, dero_refund as Uint64
     40 LET asset_reserve = get_asset_reserve(asset_address)
     41 LET dero_reserve = get_dero_reserve_per_asset(asset_address)
     50 LET dero_sold = getOutputPrice(assets_bought, dero_reserve, asset_reserve)
     60 IF dero_sold > max_dero THEN GOTO 61 ELSE GOTO 70
-    61 PANIC
+    61 RETURN 1
     70 LET dero_refund = max_dero - dero_sold
     80 IF dero_refund == 0 THEN GOTO 100
     90 SEND_DERO_TO_ADDRESS(SIGNER(), dero_refund)
@@ -204,12 +204,12 @@ End Function
 
 Function assetToDeroInput(assets_sold Uint64, min_dero Uint64, asset_address String) Uint64
     10 IF (assets_sold > 0 && min_dero > 0) THEN GOTO 30
-    20 PANIC
+    20 RETURN 1
     30 DIM asset_reserve, dero_bought as Uint64
     40 LET asset_reserve = get_asset_reserve(asset_address)
     50 LET dero_bought = getInputPrice(assets_sold, asset_reserve, get_dero_reserve_per_asset(asset_address))
     60 IF dero_bought >= min_dero THEN GOTO 80
-    70 PANIC
+    70 RETURN 1
     80 SEND_DERO_TO_ADDRESS(SIGNER(),dero_bought)
     90 set_dero_reserve_per_asset(get_dero_reserve_per_asset(asset_address) - dero_bought, asset_address)
    100 set_asset_reserve(asset_reserve + assets_sold, asset_address)
@@ -227,13 +227,13 @@ End Function
 
 Function assetToDeroOutput(dero_bought Uint64, max_assets Uint64 , asset_address String) Uint64
     10 IF  dero_bought > 0 THEN GOTO 30
-    20 PANIC
+    20 RETURN 1
     30 DIM asset_reserve, assets_sold, asset_refund as Uint64
     40 LET asset_reserve = get_asset_reserve(asset_address)
     50 LET assets_sold = getOutputPrice(dero_bought, asset_reserve, get_dero_reserve_per_asset(asset_address))
     // assets_sold is always > zero
     60 IF max_assets >= assets_sold THEN GOTO 80
-    70 PANIC
+    70 RETURN 1
     80 SEND_DERO_TO_ADDRESS(SIGNER(), dero_bought)
     90 LET asset_refund = max_assets - assets_sold
    100 IF asset_refund == 0 THEN GOTO 120
