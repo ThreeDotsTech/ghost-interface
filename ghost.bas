@@ -124,10 +124,6 @@ End Function
 // {input_reserve} Amount of DERO or Assets (input type) in exchange reserves.
 // {output_reserve} Amount of DERO or Assets (output type) in exchange reserves.
 Function getInputPrice(input_amount Uint64, input_reserve Uint64, output_reserve Uint64) Uint64
-    '01 DIM SYS_MAX_VALUE as Uint64
-    '02 LET SYS_MAX_VALUE = 18446744073709551
-    '10 IF input_reserve > 0 && output_reserve > 0 && input_amount <= SYS_MAX_VALUE THEN GOTO 30
-    '20 PANIC
     30 DIM input_amount_with_fee as Uint64
     40 LET input_amount_with_fee = input_amount * 997
     50 IF will_addition_overflow(input_reserve * 1000, input_amount * 1000) == 0 THEN GOTO 70
