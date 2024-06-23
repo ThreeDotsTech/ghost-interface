@@ -251,46 +251,6 @@ Function AssetToDeroSwapOutput(dero_bought Uint64, asset_address String) Uint64
     10 RETURN assetToDeroOutput(dero_bought, ASSETVALUE(HEXDECODE(asset_address)), asset_address)
 End Function
 
-// Public price function for DERO to Asset trades with an exact input.
-// {dero_sold} Amount of DERO sold.
-// {asset_address} Address of the asset to trade.
-// @returns Amount of Assets that can be bought with input DERO.
-Function GetDeroToAssetInputPrice(dero_sold Uint64, asset_address String) Uint64
-    10 IF dero_sold > 0 THEN GOTO 30
-    20 RETURN 0
-    30 RETURN getInputPrice(dero_sold, get_dero_reserve_per_asset(asset_address), get_asset_reserve(asset_address))
-End Function
-
-// Public price function for DERO to Asset trades with an exact output.
-// {assets_bought} Amount of Assets bought.
-// {asset_address} Address of the asset to trade.
-// @returns Amount of DERO needed to buy output Assets.
-Function GetDeroToAssetOutputPrice(assets_bought Uint64, asset_address String) Uint64
-    10 IF assets_bought > 0 THEN GOTO 30
-    20 RETURN 0
-    30 RETURN getOutputPrice(assets_bought, get_dero_reserve_per_asset(asset_address), get_asset_reserve(asset_address))
-End Function
-
-// Public price function for Asset to DERO trades with an exact input.
-// {assets_sold} Amount of Assets sold.
-// {asset_address} Address of the asset to trade.
-// @returns Amount of DERO that can be bought with input Assets.
-Function GetAssetToDeroInputPrice(assets_sold Uint64, asset_address String) Uint64
-    10 IF assets_sold > 0 THEN GOTO 30
-    20 RETURN 0
-    30 RETURN getInputPrice(assets_sold, get_asset_reserve(asset_address), get_dero_reserve_per_asset(asset_address))
-End Function
-
-// Public price function for Asset to DERO trades with an exact output.
-// {dero_bought} Amount of output DERO.
-// {asset_address} Address of the asset to trade.
-// @returns Amount of Assets needed to buy output DERO.
-Function GetAssetToDeroOutputPrice(dero_bought Uint64, asset_address String) Uint64
-    10 IF dero_bought > 0 THEN GOTO 30
-    20 RETURN 0
-    30 RETURN getOutputPrice(dero_bought, get_asset_reserve(asset_address), get_dero_reserve_per_asset(asset_address))
-End Function
-
 Function mintFee(reserve0 Uint64, reserve1 Uint64, asset_address String) Uint64
     10 DIM feeTo as String
     11 DIM rootKLast as Uint64
