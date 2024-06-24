@@ -8,8 +8,8 @@ Function Initialize() Uint64
 50	RETURN 0
 666	RETURN 1
 End Function
-Function AddLiquidity(t String,u Uint64) Uint64    
-1	DIM w2,r1,s1,t1,u1,v1,w1,x1 AS Uint64      
+Function AddLiquidity(t String,u Uint64) Uint64
+1	DIM w2,r1,s1,t1,u1,v1,w1,x1 AS Uint64
 2	LET x1 = 18446744073709551
 3	LET v1 = DEROVALUE()
 4	LET w1 = ASSETVALUE(HEXDECODE(t))
@@ -74,10 +74,6 @@ Function RemoveLiquidity(v Uint64,w Uint64,y2 Uint64,t String) Uint64
 666	RETURN 1
 End Function
 Function l1(o1 Uint64,z2 Uint64,a1 Uint64) Uint64
-1	DIM x1 AS Uint64
-2	LET x1 = 18446744073709551
-10	IF ((z2>0)&&(a1>0))&&(o1<=x1) THEN GOTO 30
-20	PANIC
 30	DIM b2 AS Uint64
 40	LET b2 = o1*997
 50	IF q(z2*1000,o1*1000)==0 THEN GOTO 70
@@ -85,19 +81,20 @@ Function l1(o1 Uint64,z2 Uint64,a1 Uint64) Uint64
 70	RETURN r(b2,a1,(z2*1000)+b2)
 End Function
 Function m1(b1 Uint64,z2 Uint64,a1 Uint64) Uint64
-10	IF ((z2>0)&&(a1>0))&&(a1>b1) THEN GOTO 30
-20	PANIC
 30	RETURN r(z2*1000,b1,((a1-b1)*997)+1)
 End Function
 Function n1(c1 Uint64,y2 Uint64,t String) Uint64
 10	IF (c1>0)&&(y2>0) THEN GOTO 30
-20	PANIC
-30	DIM d1,s1,r1 AS Uint64
+20	RETURN 1
+30	DIM d1,s1,r1,x1 AS Uint64
 40	LET s1 = m(t)
 50	LET r1 = k(t)
+51	LET x1 = 18446744073709551
+52	IF ((r1>0)&&(s1>0))&&(c1<=x1) THEN GOTO 60
+53	RETURN 1
 60	LET d1 = l1(c1,r1,s1)
 70	IF d1>=y2 THEN GOTO 90
-80	PANIC
+80	RETURN 1
 90	SEND_ASSET_TO_ADDRESS(SIGNER(),d1,HEXDECODE(t))
 100	l(s1-d1,t)
 110	j(r1+c1,t)
@@ -111,13 +108,15 @@ Function DeroToAssetSwapInputMin(min_assets Uint64,asset_address String) Uint64
 End Function
 Function d(d1 Uint64,e1 Uint64,t String) Uint64
 10	IF (d1>0)&&(e1>0) THEN GOTO 30
-20	PANIC
+20	RETURN 1
 30	DIM s1,r1,c1,c2 AS Uint64
 40	LET s1 = m(t)
 41	LET r1 = k(t)
+42	IF ((r1>0)&&(s1>0))&&(s1>d1) THEN GOTO 50
+43	RETURN 1
 50	LET c1 = m1(d1,r1,s1)
 60	IF c1>e1 THEN GOTO 61 ELSE GOTO 70
-61	PANIC
+61	RETURN 1
 70	LET c2 = e1-c1
 80	IF c2==0 THEN GOTO 100
 90	SEND_DERO_TO_ADDRESS(SIGNER(),c2)
@@ -131,14 +130,18 @@ Function DeroToAssetSwapOutput(assets_bought Uint64,asset_address String) Uint64
 End Function
 Function e(f1 Uint64,w Uint64,t String) Uint64
 10	IF (f1>0)&&(w>0) THEN GOTO 30
-20	PANIC
-30	DIM s1,g1 AS Uint64
+20	RETURN 1
+30	DIM s1,r1,g1,x1 AS Uint64
 40	LET s1 = m(t)
-50	LET g1 = l1(f1,s1,k(t))
+41	LET r1 = k(t)
+42	LET x1 = 18446744073709551
+43	IF ((s1>0)&&(r1>0))&&(f1<=x1) THEN GOTO 50
+44	RETURN 1
+50	LET g1 = l1(f1,s1,r1)
 60	IF g1>=w THEN GOTO 80
-70	PANIC
+70	RETURN 1
 80	SEND_DERO_TO_ADDRESS(SIGNER(),g1)
-90	j(k(t)-g1,t)
+90	j(r1-g1,t)
 100	l(s1+f1,t)
 110	RETURN 0
 End Function
@@ -147,42 +150,25 @@ Function AssetToDeroSwapInput(min_dero Uint64,asset_address String) Uint64
 End Function
 Function f(g1 Uint64,h1 Uint64,t String) Uint64
 10	IF g1>0 THEN GOTO 30
-20	PANIC
-30	DIM s1,f1,d2 AS Uint64
+20	RETURN 1
+30	DIM s1,r1,f1,d2 AS Uint64
 40	LET s1 = m(t)
-50	LET f1 = m1(g1,s1,k(t))
+41	LET r1 = k(t)
+42	IF ((s1>0)&&(r1>0))&&(r1>g1) THEN GOTO 50
+43	RETURN 1
+50	LET f1 = m1(g1,s1,r1)// assets_sold is always > zero
 60	IF h1>=f1 THEN GOTO 80
-70	PANIC
+70	RETURN 1
 80	SEND_DERO_TO_ADDRESS(SIGNER(),g1)
 90	LET d2 = h1-f1
 100	IF d2==0 THEN GOTO 120
 110	SEND_ASSET_TO_ADDRESS(SIGNER(),d2,HEXDECODE(t))
-120	j(k(t)-g1,t)
+120	j(r1-g1,t)
 130	l(s1+f1,t)
 140	RETURN 0
 End Function
 Function AssetToDeroSwapOutput(dero_bought Uint64,asset_address String) Uint64
 10	RETURN f(dero_bought,ASSETVALUE(HEXDECODE(asset_address)),asset_address)
-End Function
-Function GetDeroToAssetInputPrice(c1 Uint64,t String) Uint64
-10	IF c1>0 THEN GOTO 30
-20	RETURN 0
-30	RETURN l1(c1,k(t),m(t))
-End Function
-Function GetDeroToAssetOutputPrice(d1 Uint64,t String) Uint64
-10	IF d1>0 THEN GOTO 30
-20	RETURN 0
-30	RETURN m1(d1,k(t),m(t))
-End Function
-Function GetAssetToDeroInputPrice(f1 Uint64,t String) Uint64
-10	IF f1>0 THEN GOTO 30
-20	RETURN 0
-30	RETURN l1(f1,m(t),k(t))
-End Function
-Function GetAssetToDeroOutputPrice(g1 Uint64,t String) Uint64
-10	IF g1>0 THEN GOTO 30
-20	RETURN 0
-30	RETURN m1(g1,m(t),k(t))
 End Function
 Function g(i1 Uint64,j1 Uint64,t String) Uint64
 10	DIM e2 AS String
