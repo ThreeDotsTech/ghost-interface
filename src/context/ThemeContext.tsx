@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-type Theme = 'day' | 'night';
+export type Theme = 'day' | 'night';
 interface ThemeContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
