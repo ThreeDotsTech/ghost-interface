@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import Spinner from '../Spinner';
 import { useNetwork } from '../../context/NetworkContext';
+import PrimaryButton from '../PrimaryButton';
 
 const WalletConnectModalContent: React.FC<{ hideModal: () => void }> = ({ hideModal })  => {
     const { xswd, initializeXswd, subscriptions } = useNetwork();
@@ -50,7 +51,7 @@ const WalletConnectModalContent: React.FC<{ hideModal: () => void }> = ({ hideMo
     }, [xswd, subscriptions]);
 
     return (
-        <div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-md w-full">
+        <div className="flex flex-col items-center justify-center p-6 bg-white border-4 border-black shadow-neu-black w-96 ">
             <h1 className="text-xl font-bold mb-5">{statusMessage}</h1>
             <Spinner succeed={succeed} />
             <h1 className="text-xl font-semibold mb-1">XSWD Approval</h1>
@@ -65,11 +66,12 @@ const WalletConnectModalContent: React.FC<{ hideModal: () => void }> = ({ hideMo
                     </div>
                 ))}
             </div>
-            <button className={`w-full mt-5 p-3 bg-primary text-white rounded-md shadow transition-colors duration-200 ease-in-out 
-                                ${statusMessage == "Wallet succesfully connected!" ? 'hover:bg-accent' : 'disabled bg-gray-400 text-black'} mr-2`}
+            <PrimaryButton 
+                additionalClasses ={"w-full mt-5"}
+                disabled={statusMessage != "Wallet succesfully connected!"}
                     onClick={hideModal}>
-                Continue
-            </button>
+                {statusMessage != "Wallet succesfully connected!" ? 'Waiting for XSWD' : 'Continue'}
+            </PrimaryButton>
         </div>
     );
 };

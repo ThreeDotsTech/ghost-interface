@@ -50,7 +50,7 @@ const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
       const defaultPair = tradingPairs[0];
       onPairSelect(defaultPair);
     }
-  }, [tradingPairs, onPairSelect]);
+  }, [tradingPairs, onPairSelect, selectedPair]);
 
   // Update selected pair price
   useEffect(() => {
@@ -250,10 +250,10 @@ const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
 
   const assetInput = (
     <div>
-      <div className="flex gap-4 items-start m-3">
+      <div className="flex gap-3 sm:gap-4 items-start my-1 sm:my-3">
         <InputField
           type="number"
-          additionalClasses='flex-1 py-4'
+          additionalClasses = {'w-7/12'}
           //className="flex-1 p-3 border border-gray-300 text-black rounded-md shadow-sm focus:ring-primary focus:border-primary placeholder-gray-400"
           placeholder="From Amount"
           value={assetValue}
@@ -262,8 +262,9 @@ const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
         />
         <div className="flex flex-col w-5/12">
           <Select
+            additionalClasses = {'w-full'}
             //className="p-3 border border-gray-300 rounded-md shadow-sm text-gray-700 focus:ring-primary focus:border-primary"
-            value={selectedPair ?? ''}
+            value={selectedPair ?? 'WTF'}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               onPairSelect(e.target.value);
             }}
@@ -282,18 +283,18 @@ const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
 
   const deroInput = (
     <div>
-      <div className="flex gap-4 items-start m-3">
+      <div className="flex gap-3 sm:gap-4 items-start my-1 sm:my-3">
         <InputField
           type="number"
-          additionalClasses='flex-1 py-4'
           //className="flex-1 p-3 border border-gray-300 text-black rounded-md shadow-sm focus:ring-primary focus:border-primary placeholder-gray-400"
+          additionalClasses = {'w-7/12'}
           placeholder="To Amount"
           value={deroValue}
           onChange={handleDeroInputChange}
           onFocus={(e) => e.target.select()}
         />
         <div className="flex flex-col w-5/12">
-          <div className="py-4 px-2 border-4 border-black shadow-neu-black">
+          <div className="flex justify-center py-2 sm:py-4 border-4 border-black shadow-neu-black">
             DERO
           </div>
           <div className='pl-1 mt-2 text-sm text-gray-700'>
@@ -308,11 +309,11 @@ const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
   );
 
   return (
-    <div className="flex-1 max-w-lg p-6 border-4 bg-white border-black shadow-neu-black">
-      <div className="space-y-4 my-3">
+    <div className="flex-1 w-full sm:w-fit p-2 sm:p-6 border-4 bg-white border-black shadow-neu-black">
+      <div className="space-y-0.5 sm:space-y-4 my-3 sm:my-3">
         {direction === SwapDirection.ASSET_TO_DERO ? assetInput : deroInput}
         <button
-          className="mx-auto w-8 h-5 flex items-end justify-center text-primary cursor-pointer hover:text-accent transition-colors duration-200 ease-in-out"
+          className="mx-auto w-5 sm:w-8 h-3 sm:h-5 flex items-end justify-center text-primary cursor-pointer hover:text-accent transition-colors duration-200 ease-in-out"
           onClick={toggleDirection}
           aria-label="Change direction"
           style={{ background: 'none', border: 'none', outline: 'none' }}

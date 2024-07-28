@@ -20,7 +20,7 @@ const InputField: React.FC<InputFieldProps> = ({
     disabled = false,
 }) => {
     const baseClasses = `
-        p-2
+        py-2 sm:py-4
         border-4 border-black
         shadow-neu-black
         bg-white
@@ -28,7 +28,6 @@ const InputField: React.FC<InputFieldProps> = ({
         disabled:bg-gray-200 disabled:text-gray-400
         ${type === 'number' ? 'hide-arrows' : ''}
     `;
-
     return (
         <input
             type={type}
