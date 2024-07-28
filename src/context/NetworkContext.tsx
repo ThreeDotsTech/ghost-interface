@@ -1,11 +1,11 @@
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Api, AppInfo, DEROGetInfoResult, EventType, Result, generateAppId, sleep, to } from "dero-xswd-api";
-import { ConnectionType, NetworkContext } from './Types';
+import { ConnectionType, NetworkContextType } from './Types';
 import { DERO_SCID } from '../constants/addresses';
 
 const name = "Ghost Exchange";
 
-const NetworkContext = createContext<NetworkContext | undefined>(undefined);
+const NetworkContext = createContext<NetworkContextType | undefined>(undefined);
 
 // Hook to use the network context
 export const useNetwork = () => {
