@@ -3,20 +3,21 @@ import { useNetwork } from '../../context/NetworkContext';
 import { useSwap } from '../../context/SwapContext';
 import { to } from 'dero-xswd-api';
 import { DERO_SCID, GHOST_EXCHANGE_SCID } from '../../constants/addresses';
+import PrimaryButton from '../PrimaryButton';
+import InputField from '../InputField';
 
 interface AddLiquiditySectionProps {
     pair: string;
     setStatusMessage: (message: string) => void;
-    setLoading: (loading: boolean) => void;
-    setSucceed: (succeed: boolean | undefined) => void;
 }
 
-const AddLiquiditySection: React.FC<AddLiquiditySectionProps> = ({ pair, setStatusMessage, setLoading, setSucceed }) => {
+const AddLiquiditySection: React.FC<AddLiquiditySectionProps> = ({ pair, setStatusMessage }) => {
     const { xswd, isTransactionConfirmed } = useNetwork();
     const { tradingPairsBalances, selectedPair } = useSwap();
     const [assetAmount, setAssetAmount] = useState('');
     const [deroAmount, setDeroAmount] = useState('');
     const [currentRatio, setCurrentRatio] = useState<number>(0);
+    const [buttonDisabled, setButtonDisabled] = useState(false);
 
     useEffect(() => {
         if (!tradingPairsBalances) return;
@@ -58,7 +59,7 @@ const AddLiquiditySection: React.FC<AddLiquiditySectionProps> = ({ pair, setStat
             return;
         }
 
-        setLoading(true);
+        setButtonDisabled(true);
         setStatusMessage('Processing transaction...');
         
         const assetAmountNum = Math.round(parseFloat(assetAmount) * 1e5); 
@@ -83,47 +84,48 @@ const AddLiquiditySection: React.FC<AddLiquiditySectionProps> = ({ pair, setStat
         if (error) {
             setStatusMessage('Transaction failed. Please try again.');
             console.error(error);
-            setLoading(false);
+            setButtonDisabled(false);
         } else {
             const txid = resultResponse?.txid;
             if (txid) {
                 await isTransactionConfirmed(txid);
                 setStatusMessage('Liquidity added successfully!');
-                setSucceed(true);
             } else {
                 setStatusMessage('Failed to retrieve transaction ID.');
-                setSucceed(false);
             }
-            setLoading(false);
+            setButtonDisabled(false);
         }
     };
 
     return (
-        <div className="w-full">
+        <div className="flex flex-col w-full justify-end h-max grow">
             <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Amount of assets to deposit</label>
-                <input
+                <InputField
                     type="number"
-                    className="w-full p-2 border border-gray-300 rounded-md"
+                    additionalClasses = {'w-full pl-2 py-2'}
+                    placeholder="Asset amount"
                     value={assetAmount}
                     onChange={handleAssetAmountChange}
                 />
             </div>
             <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Amount of DERO to deposit</label>
-                <input
+                <InputField
                     type="number"
-                    className="w-full p-2 border border-gray-300 rounded-md"
+                    additionalClasses = {'w-full pl-2 mb-5 py-2'}
+                    placeholder="Dero amount"
                     value={deroAmount}
                     onChange={handleDeroAmountChange}
                 />
             </div>
-            <button
-                className="w-full mt-5 p-3 bg-primary text-white rounded-md shadow transition-colors duration-200 ease-in-out hover:bg-accent"
+            <PrimaryButton 
+                disabled={buttonDisabled}
+                additionalClasses ={"w-full"}
                 onClick={handleAddLiquidity}
             >
-                Add Liquidity
-            </button>
+                {buttonDisabled ? "Waiting for Tx" : "Add Liquidity"}
+            </PrimaryButton>
         </div>
     );
 };

@@ -5,9 +5,9 @@ import { DERO_SCID } from '../../constants/addresses';
 import { ConnectionState, to } from 'dero-xswd-api';
 
 const WalletInfoSection: React.FC = () => {
-  const [address, setAddress] = useState<string | undefined>(undefined);
+
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
-  const { xswd, disconnectXswd, connectionType, walletInfo } = useNetwork();
+  const { xswd, disconnectXswd, connectionType, walletInfo, address, setAddress } = useNetwork();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

@@ -58,6 +58,7 @@ export const NetworkProvider = ({ children }: { children: ReactNode }) => {
   const blockInfoRef = useRef<DEROGetInfoResult | null>(null);
   const [balances, setBalances] = useState<{ [key: string]: number | null | string }>({});
   const [intervalTimeout, setIntervalTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [address, setAddress] = useState<string | undefined>(undefined);
   const [subscriptionStatus, setSubscriptionStatus] = useState<{
     new_topoheight: boolean | undefined;
     new_balance: boolean | undefined;
@@ -230,9 +231,11 @@ export const NetworkProvider = ({ children }: { children: ReactNode }) => {
         walletInfo: {
           balances
         },
-        subscriptions: subscriptionStatus
+        subscriptions: subscriptionStatus,
+        address,
+        setAddress
       }}>
       {children}
     </NetworkContext.Provider>,
-    [api, api?.connection, blockInfo, connectXswd, balances, subscriptionStatus]);
+    [api, api?.connection, blockInfo, connectXswd, balances, subscriptionStatus, address, setAddress]);
 };

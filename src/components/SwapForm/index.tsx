@@ -253,7 +253,7 @@ const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
       <div className="flex gap-3 sm:gap-4 items-start my-1 sm:my-3">
         <InputField
           type="number"
-          additionalClasses = {'w-7/12'}
+          additionalClasses = {'w-7/12 pl-2 py-2 sm:py-4'}
           //className="flex-1 p-3 border border-gray-300 text-black rounded-md shadow-sm focus:ring-primary focus:border-primary placeholder-gray-400"
           placeholder="From Amount"
           value={assetValue}
@@ -287,14 +287,14 @@ const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
         <InputField
           type="number"
           //className="flex-1 p-3 border border-gray-300 text-black rounded-md shadow-sm focus:ring-primary focus:border-primary placeholder-gray-400"
-          additionalClasses = {'w-7/12'}
+          additionalClasses = {'w-7/12  pl-2 py-2 sm:py-4'}
           placeholder="To Amount"
           value={deroValue}
           onChange={handleDeroInputChange}
           onFocus={(e) => e.target.select()}
         />
         <div className="flex flex-col w-5/12">
-          <div className="flex justify-center py-2 sm:py-4 border-4 border-black shadow-neu-black">
+          <div className="flex justify-start pl-2 py-2 sm:py-4 border-4 border-black shadow-neu-black">
             DERO
           </div>
           <div className='pl-1 mt-2 text-sm text-gray-700'>

@@ -21,7 +21,7 @@ export enum SwapType {
   OUTPUT = "OUTPUT"
 }
 
-export type NetworkContext = {
+export type NetworkContextType = {
   isConnected: boolean;
   connectionType: ConnectionType | null;
   xswd: Api | null;
@@ -37,6 +37,9 @@ export type NetworkContext = {
   }
   // TODO: Add allowances to show optional approvals when connecting wallet
   // (GetAddress, GetTrackedAssets)
+  address: string | undefined;
+  setAddress: React.Dispatch<React.SetStateAction<string | undefined>>;
+
 }
 
 export type SwapContextType = {
@@ -45,6 +48,7 @@ export type SwapContextType = {
   selectedPair: string | undefined;
   setSelectedPair: React.Dispatch<React.SetStateAction<string | undefined>>;
   executeTrade: (amount: number, swapDirection: SwapDirection, swapType: SwapType, counterAmount?: number) => Promise<string | undefined>;
+  getBooBalance: (lpAddress: string) => number | undefined
 }
 
 export type TradingPairBalances = {

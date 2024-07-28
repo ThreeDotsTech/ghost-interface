@@ -20,7 +20,6 @@ const InputField: React.FC<InputFieldProps> = ({
     disabled = false,
 }) => {
     const baseClasses = `
-        py-2 sm:py-4
         border-4 border-black
         shadow-neu-black
         bg-white
