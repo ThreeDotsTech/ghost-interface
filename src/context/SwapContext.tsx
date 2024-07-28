@@ -21,6 +21,7 @@ export const useSwap = () => {
 
 export const SwapProvider = ({ children }: { children: ReactNode }) => {
     const {xswd, blockInfo} = useNetwork();
+    // List of all the SCIDs of assets with a trading pair in Ghost
     const [tradingPairs, setTradingPairs] = useState<string[] | null>(null)
     const [balances, setBalances] = useState<TradingPairBalances>({});
     const [selectedPair, setSelectedPair] = useState<string | undefined>(undefined);
@@ -48,7 +49,7 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
                 console.log("Updating Trading Pairs")
                 setTradingPairs(addressKeys);
             }
-            
+
         } else {
             setTradingPairs(null);
         }      
@@ -75,25 +76,16 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
           }
     };
 
-    // Parses the contents of all balances keys from SC info.
-    const fetchBooBalances = (addressKeys: string[]) => {
+    // Gets the balance of Boo tokens of an address for a given trading pair,
+    // given by the pair's asset's SCID
+    const getBooBalance = (lpAddress: string) => {
         if (!stringkeys) return;
-        const newBalances: TradingPairBalances = {};
-    
-        addressKeys.forEach((address) => {
-            const assetBalance = stringkeys[address];
-            const deroBalance = stringkeys[`${address}:DERO`];
-    
-            newBalances[address] = {
-                asset: assetBalance as number ?? 0,
-                dero: deroBalance as number ?? 0,
-            };
-        });
-        if (!isEqual(balances, newBalances)) {
-            console.log("Balances updated.");
-            console.log(newBalances);
-            setBalances(newBalances);
-          }
+        try{ // LP record may not exist
+            // Typecast, this entries will always be atomic units
+            return (stringkeys[`${lpAddress}:BOO:${selectedPair}`] as number);
+        } catch {
+            return 0;
+        }
     };
     
     // Updates reserves every block
@@ -239,7 +231,8 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
                 tradingPairsBalances: balances ?? null,
                 executeTrade,
                 selectedPair, 
-                setSelectedPair
+                setSelectedPair,
+                getBooBalance
             }}>
             {children}
         </SwapContext.Provider>,
