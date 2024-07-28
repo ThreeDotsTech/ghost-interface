@@ -266,7 +266,7 @@ index 65436ab..ca42002 100644
 -export { Address, Api, AppInfo, AuthResponse, Balance, Config, Connection, ConnectionState, DEROGetBlock, DEROGetBlockHeaderByHash, DEROGetBlockHeaderByTopoHeight, DEROGetBlockTemplate, DEROGetEncryptedBalance, DEROGetGasEstimate, DEROGetRandomAddress, DEROGetSC, DEROGetTransaction, DERONameToAddress, DEROSendRawTransaction, DVMString, DataType, Echo, Entity, Entry, ErrorResponse, EventResponse, EventType, FallbackConnection, GetBalance, GetTrackedAssets, GetTransferbyTXID, GetTransfers, Hash, JSONRPCRequest, JSONRPCRequestBody, MakeIntegratedAddress, Method, Params, QueryKey, Response, Result, ResultResponse, SCCode, SCInvoke, SplitIntegratedAddress, Stringkeys, Topoheight, Transfer, Uint64, WalletTransfer, XSWDConnection, gasEstimateSCArgs, generateAppId, scinvokeSCArgs, sleep, to };
 +export { Address, Api, AppInfo, AuthResponse, Balance, Config, ConnectionState, DEROGetBlock, DEROGetBlockHeaderByHash, DEROGetBlockHeaderByTopoHeight, DEROGetBlockTemplate, DEROGetEncryptedBalance, DEROGetGasEstimate, DEROGetRandomAddress, DEROGetSC, DEROGetTransaction, DERONameToAddress, DEROSendRawTransaction, DVMString, DataType, Echo, Entity, Entry, ErrorResponse, EventResponse, EventType, GetBalance, GetTrackedAssets, GetTransferbyTXID, GetTransfers, Hash, JSONRPCRequest, JSONRPCRequestBody, MakeIntegratedAddress, Method, Params, QueryKey, Response, Result, ResultResponse, SCCode, SCInvoke, SplitIntegratedAddress, Stringkeys, Topoheight, Transfer, Uint64, WalletTransfer, gasEstimateSCArgs, generateAppId, scinvokeSCArgs, sleep, to };
 diff --git a/node_modules/dero-xswd-api/dist/index.d.ts b/node_modules/dero-xswd-api/dist/index.d.ts
-index 65436ab..ca42002 100644
+index 65436ab..7a0f78b 100644
 --- a/node_modules/dero-xswd-api/dist/index.d.ts
 +++ b/node_modules/dero-xswd-api/dist/index.d.ts
 @@ -1,3 +1,5 @@
@@ -440,7 +440,14 @@ index 65436ab..ca42002 100644
      wallet: {
          _api: Api;
          Echo(params: Echo): Promise<Response<"wallet", "Echo", "error"> | Response<"wallet", "Echo", "result">>;
-@@ -519,8 +490,8 @@ declare class Api {
+@@ -513,14 +484,14 @@ declare class Api {
+         GetLastBlockHeader(): Promise<Response<"daemon", "DERO.GetLastBlockHeader", "error"> | Response<"daemon", "DERO.GetLastBlockHeader", "result">>;
+         GetBlockTemplate(params: DEROGetBlockTemplate): Promise<Response<"daemon", "DERO.GetBlockTemplate", "error"> | Response<"daemon", "DERO.GetBlockTemplate", "result">>;
+         GetEncryptedBalance(params: DEROGetEncryptedBalance): Promise<Response<"daemon", "DERO.GetEncryptedBalance", "error"> | Response<"daemon", "DERO.GetEncryptedBalance", "result">>;
+-        GetSC(params: DEROGetSC, waitAfterNewBlock?: true): Promise<Response<"daemon", "DERO.GetSC", "error"> | Response<"daemon", "DERO.GetSC", "result">>;
++        GetSC(params: DEROGetSC, waitAfterNewBlock?: boolean): Promise<Response<"daemon", "DERO.GetSC", "error"> | Response<"daemon", "DERO.GetSC", "result">>;
+         GetGasEstimate(params: DEROGetGasEstimate): Promise<Response<"daemon", "DERO.GetGasEstimate", "error"> | Response<"daemon", "DERO.GetGasEstimate", "result">>;
+         NameToAddress(params: DERONameToAddress): Promise<Response<"daemon", "DERO.NameToAddress", "error"> | Response<"daemon", "DERO.NameToAddress", "result">>;
      };
  }
  
