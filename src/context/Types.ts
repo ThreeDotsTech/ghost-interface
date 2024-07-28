@@ -39,7 +39,7 @@ export type NetworkContext = {
   // (GetAddress, GetTrackedAssets)
 }
 
-export type SwapContext = {
+export type SwapContextType = {
   tradingPairs: string[] | null;
   tradingPairsBalances: TradingPairBalances | null;
   selectedPair: string | undefined;

@@ -1,11 +1,11 @@
 import { createContext, useContext, useState, ReactNode, useEffect, useMemo, useCallback } from 'react';
 import { gasEstimateSCArgs, to } from "dero-xswd-api";
-import { SwapContext, SwapDirection, SwapType, TradingPairBalances } from './Types';
+import { SwapContextType, SwapDirection, SwapType, TradingPairBalances } from './Types';
 import { GHOST_EXCHANGE_SCID } from '../constants/addresses';
 import { useNetwork } from './NetworkContext';
 import { getAddressKeys, isEqual } from '../utils';
 
-const SwapContext = createContext<SwapContext | undefined>(undefined);
+const SwapContext = createContext<SwapContextType | undefined>(undefined);
 
 
 // Hook to use the swap context
@@ -56,6 +56,27 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
 
     // Parses the contents of all balances keys from SC info.
     const fetchBalances = (addressKeys: string[]) => {
+        if (!stringkeys) return;
+        const newBalances: TradingPairBalances = {};
+    
+        addressKeys.forEach((address) => {
+            const assetBalance = stringkeys[address];
+            const deroBalance = stringkeys[`${address}:DERO`];
+    
+            newBalances[address] = {
+                asset: assetBalance as number ?? 0,
+                dero: deroBalance as number ?? 0,
+            };
+        });
+        if (!isEqual(balances, newBalances)) {
+            console.log("Balances updated.");
+            console.log(newBalances);
+            setBalances(newBalances);
+          }
+    };
+
+    // Parses the contents of all balances keys from SC info.
+    const fetchBooBalances = (addressKeys: string[]) => {
         if (!stringkeys) return;
         const newBalances: TradingPairBalances = {};
     
