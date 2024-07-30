@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNetwork } from '../../context/NetworkContext';
 import { to } from 'dero-xswd-api';
 import { DERO_SCID, GHOST_EXCHANGE_SCID } from '../../constants/addresses';
+import InputField from '../InputField';
+import PrimaryButton from '../PrimaryButton';
 
 const CreateTradingPairModalContent: React.FC<{ hideModal: () => void }> = ({ hideModal }) => {
     const { xswd, isTransactionConfirmed } = useNetwork();
@@ -34,8 +36,8 @@ const CreateTradingPairModalContent: React.FC<{ hideModal: () => void }> = ({ hi
         setLoading(true);
         setStatusMessage('Processing transaction...');
         
-        const assetAmountNum = Math.round(parseFloat(assetAmount) * 1e5); // Adjust to your atomic unit factor
-        const deroAmountNum = Math.round(parseFloat(deroAmount) * 1e5); // Adjust to your atomic unit factor
+        const assetAmountNum = Math.round(parseFloat(assetAmount) * 1e5);
+        const deroAmountNum = Math.round(parseFloat(deroAmount) * 1e5);
 
         const response = await xswd.wallet.transfer({
             scid: GHOST_EXCHANGE_SCID, // Replace with actual SCID
@@ -72,55 +74,59 @@ const CreateTradingPairModalContent: React.FC<{ hideModal: () => void }> = ({ hi
     };
 
     return (
-        <div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-md w-full">
+        <div className="flex flex-col items-center justify-center p-6 bg-white border-4 border-black shadow-neu-black shadow-md w-full">
             <h1 className="text-xl font-bold mb-5">Create a trading pair on Ghost</h1>
             <div className="mb-4 w-full">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Asset SCID</label>
-                <input
+                <InputField
                     type="text"
-                    className="w-full p-2 border border-gray-300 rounded-md"
+                    additionalClasses = {'w-full p-2'}
+                    placeholder="SCID"
                     value={assetSCID}
                     onChange={(e) => setAssetSCID(e.target.value)}
                 />
             </div>
             <div className="mb-4 w-full">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Amount of assets to deposit</label>
-                <input
+                <InputField
                     type="number"
-                    className="w-full p-2 border border-gray-300 rounded-md"
+                    additionalClasses = {'w-full p-2'}
+                    placeholder="0"
                     value={assetAmount}
                     onChange={(e) => setAssetAmount(e.target.value)}
                 />
             </div>
             <div className="mb-4 w-full">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Amount of DERO to deposit</label>
-                <input
+                <InputField
                     type="number"
-                    className="w-full p-2 border border-gray-300 rounded-md"
+                    additionalClasses = {'w-full p-2'}
+                    placeholder="0"
                     value={deroAmount}
                     onChange={(e) => setDeroAmount(e.target.value)}
                 />
             </div>
             <div className="mb-4 w-full">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Initial Price</label>
-                <input
-                    type="text"
-                    className="w-full p-2 border border-gray-300 rounded-md bg-gray-100"
+                <InputField
+                    type="number"
+                    additionalClasses = {'w-full p-2'}
+                    placeholder="0"
                     value={initialPrice}
-                    readOnly
+                    onChange={() => {}}
+                    disabled
                 />
             </div>
             <div className="mb-4 w-full text-sm text-gray-600">
                 <p>Note: A trading pair on an Automated Market Maker (AMM) works by providing initial liquidity. The initial price is determined by the ratio of the amounts of assets and DERO you deposit. Ensure you understand how AMMs and liquidity pools function before proceeding.</p>
             </div>
-            <button
-                className={`w-full mt-5 p-3 bg-primary text-white rounded-md shadow transition-colors duration-200 ease-in-out 
-                ${succeed === true ? 'hover:bg-accent' : 'disabled:bg-gray-400 disabled:text-black'}`}
-                onClick={handleAddLiquidity}
+            <PrimaryButton 
                 disabled={loading}
+                additionalClasses ={"w-full mt-5 p-3"}
+                onClick={handleAddLiquidity}
             >
-                {loading ? 'Processing...' : 'Add Liquidity'}
-            </button>
+                {loading ? "Waiting for Tx" : "Create pair"}
+            </PrimaryButton>
             {statusMessage && <p className="mt-4 text-sm text-gray-700">{statusMessage}</p>}
         </div>
     );
