@@ -1,37 +1,29 @@
-import { useEffect } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
 import { useSwap } from "../context/SwapContext";
 import SwapForm from '../components/SwapForm';
 import TradingPairsList from '../components/TradingPairsList';
 import HappyGhost from '../../assets/SVG/happy-ghost.svg';
 import ScaryGhost from '../../assets/SVG/scary-ghost.svg';
-import { useTheme, Theme } from '../context/ThemeContext';
+import { useTheme } from '../context/ThemeContext';
+import { useEffect } from "react";
+import { useParams } from "react-router-dom";
 
 function Swap() {
-  const { tradingPairs } = useSwap();
-  const { address } = useParams<{ address?: string }>();
   
   const {theme} = useTheme();
-  const history = useHistory();
-  const { setSelectedPair } = useSwap();
+  const { setSelectedPair, tradingPairs } = useSwap();
+  const { address } = useParams<{ address: string }>();
 
-  // useEffect(() => {
-  //   if (tradingPairs && address && !tradingPairs.includes(address)) {
-  //     setSelectedPair(undefined);
-  //   }
-  // }, [address, tradingPairs]);
-
-  const handlePairClick = (pairAddress: string | undefined) => {
-    console.log("Clicked from ", `/swap/${pairAddress}`)
-    setSelectedPair(pairAddress);
-    history .replace(`/swap/${pairAddress}`);
-  };
+    // Update dom route on selected pair change
+    // Has to do here as contexts are not children of Router
+    useEffect(() => {
+      setSelectedPair(address)
+    }, [ address]);
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row items-center justify-center lg:justify-start bg-background text-text -z-50 overflow-hidden">
       <div className="relative w-full flex items-center justify-center z-10 mt-20 xl:mt-10">
         <div className="flex flex-col items-center relative w-11/12 sm:w-auto">
-          <SwapForm onPairSelect={handlePairClick}/>
+          <SwapForm />
           <img
             src={theme == "day"  ? HappyGhost : ScaryGhost}
             alt="Happy Ghost"
@@ -40,7 +32,7 @@ function Swap() {
         </div>
       </div>
       <div className="hidden lg:flex sm mt-20 xl:mt-10">
-        <TradingPairsList tradingPairs={["ee300fe87cf9fb3bd600b25d6af4cd54569022a3fa264a1cb20174bb9ef7afa2","ee300fe87cf9fb3bd600b25d6af4cd54569022a3fa264a1cb20174bb9ef7afa3"]} onSelectPair={handlePairClick} />
+        <TradingPairsList tradingPairs={tradingPairs} />
       </div>
     </div>
   );

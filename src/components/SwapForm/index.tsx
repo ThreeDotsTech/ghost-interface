@@ -11,16 +11,13 @@ import InputField from '../InputField';
 import Select from '../Select';
 import ConnectWalletButton from '../ConnectWalletButton';
 
-interface SwapFormProps {
-  onPairSelect: (pair: string) => void;
-}
 
 enum LastInput {
   DERO = "DERO",
   ASSET = "ASSET",
 }
 
-const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
+const SwapForm: React.FC = () => {
   const [assetValue, setAssetValue] = useState('0');
   const [deroValue, setDeroValue] = useState('0');
   const [assetErrorMessage, setAssetErrorMessage] = useState<undefined | string>();
@@ -31,7 +28,7 @@ const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
   const [errorMessageTimeoutId, setErrorMessageTimeoutId] = useState<NodeJS.Timeout | undefined>(undefined);
   const [assetReserve, setAssetReserve] = useState<number | undefined>();
   const [deroReserve, setDeroReserve] = useState<number | undefined>();
-  const { tradingPairs, tradingPairsBalances, selectedPair, executeTrade } = useSwap(); // Retrieve executeTrade
+  const { tradingPairs, tradingPairsBalances, selectedPair, setSelectedPair, executeTrade } = useSwap(); // Retrieve executeTrade
   const [selectedPairPrice, setSelectedPairPrice] = useState<string | null>(null);
   const { walletInfo, xswd, connectionType, isTransactionConfirmed } = useNetwork();
 
@@ -43,14 +40,6 @@ const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
     const id = setTimeout(callback, delay);
     setInpuChangetTimeoutId(id);
   };
-
-  // Set the initial selected trading pair
-  useEffect(() => {
-    if (tradingPairs && tradingPairs.length > 0 && !selectedPair) {
-      const defaultPair = tradingPairs[0];
-      onPairSelect(defaultPair);
-    }
-  }, [tradingPairs, onPairSelect, selectedPair]);
 
   // Update selected pair price
   useEffect(() => {
@@ -254,7 +243,6 @@ const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
         <InputField
           type="number"
           additionalClasses = {'w-7/12 pl-2 py-2 sm:py-4'}
-          //className="flex-1 p-3 border border-gray-300 text-black rounded-md shadow-sm focus:ring-primary focus:border-primary placeholder-gray-400"
           placeholder="From Amount"
           value={assetValue}
           onChange={handleAssetInputChange}
@@ -263,10 +251,10 @@ const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
         <div className="flex flex-col w-5/12">
           <Select
             additionalClasses = {'w-full'}
-            //className="p-3 border border-gray-300 rounded-md shadow-sm text-gray-700 focus:ring-primary focus:border-primary"
             value={selectedPair ?? 'WTF'}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-              onPairSelect(e.target.value);
+              console.log("selected pair changed")
+              setSelectedPair(e.target.value);
             }}
             options={tradingPairs ?? []}
           />
@@ -286,7 +274,6 @@ const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
       <div className="flex gap-3 sm:gap-4 items-start my-1 sm:my-3">
         <InputField
           type="number"
-          //className="flex-1 p-3 border border-gray-300 text-black rounded-md shadow-sm focus:ring-primary focus:border-primary placeholder-gray-400"
           additionalClasses = {'w-7/12  pl-2 py-2 sm:py-4'}
           placeholder="To Amount"
           value={deroValue}
@@ -327,7 +314,6 @@ const SwapForm: React.FC<SwapFormProps> = ({ onPairSelect }) => {
             <PrimaryButton 
             disabled={swapButtonDisabled}
             additionalClasses ={"w-full"}
-            //className="w-full p-3 bg-primary disabled:bg-slate-400 disabled:hover:bg-slate-400 disabled:hover:cursor-wait text-white rounded-md shadow hover:bg-accent transition-colors duration-200 ease-in-out" 
             onClick={handleSwapButtonClick} // Attach handler to swap button
           >
             {swapButtonDisabled ? "Waiting for Tx" : "Swap"}

@@ -21,7 +21,7 @@ const WalletInfoSection: React.FC = () => {
       if (error) setAddress('???');
     };
     fetchAddress();
-  }, [xswd, connectionType, address]);
+  }, [xswd, connectionType, address, setAddress]);
 
   const handleLogout = () => {
     if (xswd && xswd.connection) {

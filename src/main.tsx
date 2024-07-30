@@ -12,15 +12,15 @@ import { ModalProvider } from './context/ModalContext.tsx'
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <NetworkProvider>
-      <SwapProvider>
-        <ModalProvider>
-          <HashRouter>
-            <ThemeProvider>
-              <App />
-            </ThemeProvider>
-          </HashRouter>
-        </ModalProvider>
-      </SwapProvider>
+      <HashRouter>
+        <SwapProvider>
+          <ModalProvider>
+              <ThemeProvider>
+                <App />
+              </ThemeProvider>
+          </ModalProvider>
+        </SwapProvider>
+      </HashRouter>
     </NetworkProvider>
   </React.StrictMode>,
 )

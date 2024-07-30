@@ -4,6 +4,7 @@ import { SwapContextType, SwapDirection, SwapType, TradingPairBalances } from '.
 import { GHOST_EXCHANGE_SCID } from '../constants/addresses';
 import { useNetwork } from './NetworkContext';
 import { getAddressKeys, isEqual } from '../utils';
+import { useHistory } from 'react-router-dom';
 
 const SwapContext = createContext<SwapContextType | undefined>(undefined);
 
@@ -29,7 +30,7 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
         [k: string]: string | number;
         C: string;
     } | undefined>(undefined);
-    
+    const history = useHistory();
     // Get Ghost SC info.
     const  getContractInfo = async () => {
         if (!xswd) return;
@@ -70,11 +71,24 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
             };
         });
         if (!isEqual(balances, newBalances)) {
-            console.log("Balances updated.");
-            console.log(newBalances);
             setBalances(newBalances);
           }
     };
+
+    // Set the initial selected trading pair
+    useEffect(() => {
+        if (tradingPairs && tradingPairs.length > 0 && !selectedPair) {
+        const defaultPair = tradingPairs[0];
+        setSelectedPair(defaultPair);
+        }
+    }, [tradingPairs, selectedPair, history, setSelectedPair]);
+
+    // Update dom route on selected pair change
+    useEffect(() => {
+        if (!selectedPair) return
+        console.log("selected pair updated:", selectedPair)
+        history.replace(`/${selectedPair}`);
+    }, [ selectedPair, history]);
 
     // Gets the balance of Boo tokens of an address for a given trading pair,
     // given by the pair's asset's SCID

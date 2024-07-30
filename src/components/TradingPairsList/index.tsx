@@ -7,10 +7,9 @@ import TradingPairListButton from '../TradingPairListButton';
 
 interface TradingPairsListProps {
   tradingPairs: string[] | null;
-  onSelectPair: (pair: string | undefined) => void;
 }
 
-const TradingPairsList: React.FC<TradingPairsListProps> = ({ tradingPairs, onSelectPair }) => {
+const TradingPairsList: React.FC<TradingPairsListProps> = ({ tradingPairs }) => {
   const { selectedPair } = useSwap();
   const { showModal, hideModal } = useModal();
 
@@ -31,7 +30,6 @@ const TradingPairsList: React.FC<TradingPairsListProps> = ({ tradingPairs, onSel
             key={pair}
             pair={pair}
             selectedPair={selectedPair}
-            onSelectPair={onSelectPair}
             onManageLiquidityClick={handleManageLiquidityClick}
           />
         ))}
