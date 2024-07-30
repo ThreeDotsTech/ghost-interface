@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNetwork } from '../../context/NetworkContext';
 
 interface TradingPairListButtonProps {
   pair: string;
@@ -13,17 +14,19 @@ const TradingPairListButton: React.FC<TradingPairListButtonProps> = ({
   onSelectPair,
   onManageLiquidityClick,
 }) => {
+  const { connectionType } = useNetwork();
   return (
     <li className="ml-4 border-l-4 border-y-4 rounded-l-xl border-black shadow-neu-black transition-all duration-200 flex justify-between items-stretch overflow-hidden font-semibold text-lg">
         {
-            selectedPair === pair ?
+            selectedPair === pair ? // Only show when the pair is active
+            connectionType === 'XSWD' ? // Only show if wallet is connected
             <button
             className="p-1 bg-primary text-white border-black border-r-4 shadow hover:bg-accent transition-colors duration-200 ease-in-out"
             onClick={() => onManageLiquidityClick(pair)}
             >
             Manage
             </button>  
-            : <></>
+            : <></> : <></>
         }
         <a
         href="#"
