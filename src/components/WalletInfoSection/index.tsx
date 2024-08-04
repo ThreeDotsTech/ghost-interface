@@ -66,7 +66,7 @@ const WalletInfoSection: React.FC = () => {
       >
         {address ? truncateAddress(address!) : 'Waiting for address'}
         {isDropdownOpen && (
-          <div className="dropdown absolute top-12 right-2 border" style={{ borderColor: 'var(--color-border)', padding: '8px', color: 'var(--color-accent)' }}>
+          <div className="dropdown absolute top-12 right-2 border-black border-4 shadow-neu-black p-2 bg-accent" >
             <button onClick={handleLogout}>Log out</button>
           </div>
         )}
