@@ -20,12 +20,12 @@
 [data-theme="night"] {
   /* Base colors */
   --color-background: #2E3440; 
-  --color-text: #ECEFF4; 
+  --color-text: #343A40; 
 
   /* Primary and accent colors */
-  --color-primary: #81A1C1; 
-  --color-secondary: #5E81AC; 
-  --color-accent: #D08770; 
+  --color-primary: #81CCB1; 
+  --color-secondary: #598FD1; 
+  --color-accent: #E086BC; 
 
   /* Additional colors for variety and depth */
   --color-border: #4C566A; 
