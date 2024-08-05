@@ -30,7 +30,7 @@ jobs:
           git config --global user.email 'deployoooor[bot]@threedots.io'
           git clone --single-branch --branch build https://github.com/${{ github.repository }} build
           cp build/CNAME dist/CNAME || true
-          rsync -av --delete --exclude='.git' dist/ build/
+          rsync -avc --delete --exclude='.git' dist/ build/
           cd build
           git add .
           git commit -m "Deploy to build branch"
