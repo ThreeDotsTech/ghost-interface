@@ -12,7 +12,7 @@ interface TradingPairsListProps {
 
 const TradingPairsList: React.FC<TradingPairsListProps> = ({ tradingPairs }) => {
   const { selectedPair } = useSwap();
-  const { showModal, hideModal } = useModal();
+  const { showModal } = useModal();
   const { connectionType } = useNetwork();
 
   const handleCreatePairClick = () => {
