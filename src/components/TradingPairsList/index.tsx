@@ -16,11 +16,11 @@ const TradingPairsList: React.FC<TradingPairsListProps> = ({ tradingPairs }) => 
   const { connectionType } = useNetwork();
 
   const handleCreatePairClick = () => {
-    showModal(<CreateTradingPairModalContent hideModal={hideModal} />);
+    showModal(<CreateTradingPairModalContent />);
   };
 
   const handleManageLiquidityClick = (pair: string) => {
-    showModal(<ManageLiquidityModalContent pair={pair} hideModal={hideModal} />);
+    showModal(<ManageLiquidityModalContent pair={pair} />);
   };
 
   return (

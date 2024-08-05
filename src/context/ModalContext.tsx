@@ -8,7 +8,7 @@ interface ModalContextType {
 }
 
 const defaultContext: ModalContextType = {
-    showModal: (content: ReactNode) => {},
+    showModal: (_: ReactNode) => {},
     hideModal: () => {}  // Defined callable function
   };
 

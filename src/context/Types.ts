@@ -1,4 +1,4 @@
-import { Api, DEROGetInfoResult, EventType } from "dero-xswd-api";
+import { Api, DEROGetInfoResult } from "dero-xswd-api";
 
 export const ConnectionType = {
     XSWD: 'XSWD',

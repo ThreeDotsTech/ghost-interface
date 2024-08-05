@@ -29,7 +29,6 @@ const SwapForm: React.FC = () => {
   const [assetReserve, setAssetReserve] = useState<number | undefined>();
   const [deroReserve, setDeroReserve] = useState<number | undefined>();
   const { tradingPairs, tradingPairsBalances, selectedPair, setSelectedPair, executeTrade } = useSwap(); // Retrieve executeTrade
-  const [selectedPairPrice, setSelectedPairPrice] = useState<string | null>(null);
   const { walletInfo, xswd, connectionType, isTransactionConfirmed } = useNetwork();
 
   const [swapButtonDisabled, setSwapButtonDisabled] = useState<boolean>(false);
@@ -49,8 +48,7 @@ const SwapForm: React.FC = () => {
     setDeroReserve(numerator);
     const denominator = tradingPairsBalances[selectedPair].asset;
     setAssetReserve(denominator);
-    setSelectedPairPrice((numerator / denominator).toFixed(5));
-  }, [selectedPair, tradingPairsBalances, setSelectedPairPrice, setAssetReserve, setDeroReserve]);
+  }, [selectedPair, tradingPairsBalances, setAssetReserve, setDeroReserve]);
 
   // Function to handle asset input changes
   const handleAssetValueChange = useCallback((inputValue: string, updatedDirection?: SwapDirection) => {

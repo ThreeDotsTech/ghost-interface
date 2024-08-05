@@ -5,7 +5,7 @@ import { DERO_SCID, GHOST_EXCHANGE_SCID } from '../../constants/addresses';
 import InputField from '../InputField';
 import PrimaryButton from '../PrimaryButton';
 
-const CreateTradingPairModalContent: React.FC<{ hideModal: () => void }> = ({ hideModal }) => {
+const CreateTradingPairModalContent: React.FC = () => {
     const { xswd, isTransactionConfirmed } = useNetwork();
     const [assetSCID, setAssetSCID] = useState('');
     const [assetAmount, setAssetAmount] = useState('');
@@ -13,7 +13,6 @@ const CreateTradingPairModalContent: React.FC<{ hideModal: () => void }> = ({ hi
     const [initialPrice, setInitialPrice] = useState('0');
     const [statusMessage, setStatusMessage] = useState('Waiting for input...');
     const [loading, setLoading] = useState(false);
-    const [succeed, setSucceed] = useState<boolean | undefined>(undefined);
 
     useEffect(() => {
         if (assetAmount && deroAmount) {
@@ -64,10 +63,8 @@ const CreateTradingPairModalContent: React.FC<{ hideModal: () => void }> = ({ hi
             if (txid) {
                 await isTransactionConfirmed(txid);
                 setStatusMessage('Trading pair created successfully!');
-                setSucceed(true);
             } else {
                 setStatusMessage('Failed to retrieve transaction ID.');
-                setSucceed(false);
             }
             setLoading(false);
         }

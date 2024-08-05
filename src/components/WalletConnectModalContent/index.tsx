@@ -6,7 +6,6 @@ import PrimaryButton from '../PrimaryButton';
 const WalletConnectModalContent: React.FC<{ hideModal: () => void }> = ({ hideModal })  => {
     const { xswd, initializeXswd, subscriptions } = useNetwork();
     const [statusMessage, setStatusMessage] = useState<string>('Waiting for XSWD connection...');
-    const [loading, setLoading] = useState<boolean>(true);
     const [succeed, setSucceed] = useState<boolean | undefined>(undefined);
     const [subscriptionStatus, setSubscriptionStatus] = useState<{ new_topoheight: boolean | undefined; new_balance: boolean | undefined; new_entry: boolean | undefined; }>({
         new_topoheight: undefined,
@@ -33,8 +32,6 @@ const WalletConnectModalContent: React.FC<{ hideModal: () => void }> = ({ hideMo
                 } else{
                     setStatusMessage('Failed to connect. Please try again.');
                 }
-                
-                setLoading(false);
             });
         }
     }, [initializeXswd]);

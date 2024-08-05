@@ -4,7 +4,7 @@ import RemoveLiquiditySection from '../RemoveLiquiditySection';
 import { useSwap } from '../../context/SwapContext';
 import { useNetwork } from '../../context/NetworkContext';
 
-const ManageLiquidityModalContent: React.FC<{ pair: string, hideModal: () => void }> = ({ pair, hideModal }) => {
+const ManageLiquidityModalContent: React.FC<{ pair: string }> = ({ pair }) => {
     const [statusMessage, setStatusMessage] = useState('Waiting for input...');
     const { getBooBalance } = useSwap();
     const { address } = useNetwork();
