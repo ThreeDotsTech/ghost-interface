@@ -251,7 +251,6 @@ const SwapForm: React.FC = () => {
             additionalClasses = {'w-full'}
             value={selectedPair ?? 'WTF'}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-              console.log("selected pair changed")
               setSelectedPair(e.target.value);
             }}
             options={tradingPairs ?? []}
@@ -298,7 +297,7 @@ const SwapForm: React.FC = () => {
       <div className="space-y-0.5 sm:space-y-4 my-3 sm:my-3">
         {direction === SwapDirection.ASSET_TO_DERO ? assetInput : deroInput}
         <button
-          className="mx-auto w-5 sm:w-8 h-3 sm:h-5 flex items-end justify-center text-primary cursor-pointer hover:text-accent transition-colors duration-200 ease-in-out"
+          className="mx-auto w-5 sm:w-8 h-8 flex items-center justify-center text-primary cursor-pointer hover:text-accent transition-colors duration-200 ease-in-out"
           onClick={toggleDirection}
           aria-label="Change direction"
           style={{ background: 'none', border: 'none', outline: 'none' }}
