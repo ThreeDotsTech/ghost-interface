@@ -38,7 +38,7 @@ function Footer() {
     return '';
   };
 
-  const toggleIcon = theme === 'day' ? '🌙' : '☀️';
+  const toggleIcon = theme === 'day' ? '☀️' : '🌙';
 
   return (
     <footer className="fixed bottom-0 left-0 w-full flex justify-between items-center pb-2 px-4 bg-background text-text">
