@@ -14,7 +14,7 @@ const Select: React.FC<SelectProps> = ({
     value,
     onChange,
     additionalClasses = '',
-    placeholder = 'Select an option',
+    placeholder = 'Select an asset',
     disabled = false,
 }) => {
     const baseClasses = `
