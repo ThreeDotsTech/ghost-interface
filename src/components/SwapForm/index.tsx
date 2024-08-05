@@ -297,13 +297,14 @@ const SwapForm: React.FC = () => {
       <div className=" my-3 sm:my-3">
         {direction === SwapDirection.ASSET_TO_DERO ? assetInput : deroInput}
         <button
-          className="mx-auto w-5 sm:w-8 h-8 flex items-center justify-center text-primary cursor-pointer hover:text-accent transition-colors duration-200 ease-in-out"
+          className="mx-auto w-5 sm:w-8 h-8 flex items-center justify-center stroke-primary cursor-pointer transition-colors duration-200 ease-in-out"
           onClick={toggleDirection}
           aria-label="Change direction"
           style={{ background: 'none', border: 'none', outline: 'none' }}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <polyline points="19 12 12 19 5 12"></polyline>
           </svg>
         </button>
         {direction === SwapDirection.ASSET_TO_DERO ? deroInput : assetInput}
