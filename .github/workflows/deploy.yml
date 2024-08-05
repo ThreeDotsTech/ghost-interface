@@ -1,0 +1,37 @@
+name: Deploy Ghost Interface
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18' 
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Build the React app
+        run: yarn build
+
+      - name: Deploy to build branch
+        run: |
+          git config --global user.name 'deployoooor[bot]'
+          git config --global user.email 'deployoooor[bot]@threedots.io'
+          git clone --single-branch --branch build https://github.com/${{ github.repository }} build
+          cp build/CNAME dist/CNAME || true
+          rsync -av --delete dist/ build/
+          cd build
+          git add .
+          git commit -m "Deploy to build branch"
+          git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} build
