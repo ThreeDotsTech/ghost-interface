@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Base colors */
+  --color-background: #E7F0FF; 
+  --color-text: #343A40; 
+
+  /* Primary and accent colors */
+  --color-primary: #81CCB1; 
+  --color-secondary: #598FD1; 
+  --color-accent: #E086BC; 
+
+  /* Additional colors for variety and depth */
+  --color-border: #D3DDE6; 
+  --color-shadow: rgba(0, 0, 0, 0.1); 
+}
+
+[data-theme="night"] {
+  /* Base colors */
+  --color-background: #2E3440; 
+  --color-text: #343A40; 
+
+  /* Primary and accent colors */
+  --color-primary: #81CCB1; 
+  --color-secondary: #598FD1; 
+  --color-accent: #E086BC; 
+
+  /* Additional colors for variety and depth */
+  --color-border: #4C566A; 
+  --color-shadow: rgba(0, 0, 0, 0.2); 
+}
