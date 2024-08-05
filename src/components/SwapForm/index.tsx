@@ -237,7 +237,7 @@ const SwapForm: React.FC = () => {
 
   const assetInput = (
     <div>
-      <div className="flex gap-3 sm:gap-4 items-start my-1 sm:my-3">
+      <div className="flex gap-3 sm:gap-4 items-start my-5">
         <InputField
           type="number"
           additionalClasses = {'w-7/12 pl-2 py-2 sm:py-4'}
@@ -246,7 +246,7 @@ const SwapForm: React.FC = () => {
           onChange={handleAssetInputChange}
           onFocus={(e) => e.target.select()}
         />
-        <div className="flex flex-col w-5/12">
+        <div className="relative flex flex-col w-5/12">
           <Select
             additionalClasses = {'w-full'}
             value={selectedPair ?? 'WTF'}
@@ -255,7 +255,7 @@ const SwapForm: React.FC = () => {
             }}
             options={tradingPairs ?? []}
           />
-          <div className='pl-1 mt-2 text-sm text-gray-700'>
+          <div className='pl-1 mt-2 text-sm text-gray-700  absolute top-12 sm:top-16 left-0'>
             {selectedPair && walletInfo.balances[selectedPair] ? "Balance: " + atomicUnitsToString(walletInfo.balances[selectedPair] as number) : ""}
           </div>
         </div>
@@ -268,7 +268,7 @@ const SwapForm: React.FC = () => {
 
   const deroInput = (
     <div>
-      <div className="flex gap-3 sm:gap-4 items-start my-1 sm:my-3">
+      <div className="flex gap-3 sm:gap-4 items-start my-5">
         <InputField
           type="number"
           additionalClasses = {'w-7/12  pl-2 py-2 sm:py-4'}
@@ -277,11 +277,11 @@ const SwapForm: React.FC = () => {
           onChange={handleDeroInputChange}
           onFocus={(e) => e.target.select()}
         />
-        <div className="flex flex-col w-5/12">
+        <div className="relative flex flex-col w-5/12">
           <div className="flex justify-start pl-2 py-2 sm:py-4 border-4 border-black shadow-neu-black">
             DERO
           </div>
-          <div className='pl-1 mt-2 text-sm text-gray-700'>
+          <div className='pl-1 mt-2 text-sm text-gray-700 absolute top-12 sm:top-16 left-0'>
             {typeof(walletInfo.balances[DERO_SCID]) === "number" ? "Balance: " + atomicUnitsToString(walletInfo.balances[DERO_SCID] as number) : ""}
           </div>
         </div>
@@ -294,7 +294,7 @@ const SwapForm: React.FC = () => {
 
   return (
     <div className="flex-1 w-full sm:w-fit p-2 sm:p-6 border-4 bg-white border-black shadow-neu-black">
-      <div className="space-y-0.5 sm:space-y-4 my-3 sm:my-3">
+      <div className=" my-3 sm:my-3">
         {direction === SwapDirection.ASSET_TO_DERO ? assetInput : deroInput}
         <button
           className="mx-auto w-5 sm:w-8 h-8 flex items-center justify-center text-primary cursor-pointer hover:text-accent transition-colors duration-200 ease-in-out"
@@ -302,7 +302,7 @@ const SwapForm: React.FC = () => {
           aria-label="Change direction"
           style={{ background: 'none', border: 'none', outline: 'none' }}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
           </svg>
         </button>
@@ -310,7 +310,7 @@ const SwapForm: React.FC = () => {
         { connectionType === 'XSWD' ? 
             <PrimaryButton 
             disabled={swapButtonDisabled}
-            additionalClasses ={"w-full"}
+            additionalClasses ={"w-full mt-5"}
             onClick={handleSwapButtonClick} // Attach handler to swap button
           >
             {swapButtonDisabled ? "Waiting for Tx" : "Swap"}
