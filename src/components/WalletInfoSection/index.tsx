@@ -9,6 +9,17 @@ const WalletInfoSection: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const { xswd, disconnectXswd, connectionType, walletInfo, address, setAddress } = useNetwork();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [mobile, setMobile] = useState(window.innerWidth <= 420);
+    const handleWindowSizeChange = () => {
+        setMobile(window.innerWidth <= 420);
+      }
+      
+      useEffect(() => {
+        window.addEventListener('resize', handleWindowSizeChange);
+        return () => {
+          window.removeEventListener('resize', handleWindowSizeChange);
+        }
+      }, []);
 
   useEffect(() => {
     const fetchAddress = async () => {
@@ -55,11 +66,11 @@ const WalletInfoSection: React.FC = () => {
 
   return (
     <div className='flex items-center' ref={dropdownRef}>
-      {walletInfo.balances[DERO_SCID] !== undefined && (
+      {walletInfo.balances[DERO_SCID] !== undefined && ( !mobile ?
         <div className="balance mr-2 font-medium">
           {typeof(walletInfo.balances[DERO_SCID]) === 'number' ? atomicUnitsToString(walletInfo.balances[DERO_SCID]) : walletInfo.balances[DERO_SCID]} DERO
         </div>
-      )}
+      : <></>)}
       <div
         className='shadow-neu-black border-4 border-black bg-secondary font-semibold text-background py-4 px-4 -my-4 text-black cursor-pointer'
         onClick={handleClick}
