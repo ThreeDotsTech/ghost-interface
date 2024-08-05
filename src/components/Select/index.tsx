@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface SelectProps {
     options: string[];
@@ -22,14 +22,25 @@ const Select: React.FC<SelectProps> = ({
         px-2
         border-4 border-black
         shadow-neu-black
-        bg-white
         transition-all duration-200
         ease-in-out
         disabled:bg-gray-200 disabled:text-gray-400
         appearance-none
         bg-no-repeat bg-right
-        pr-10
+        mr-10
     `;
+    const [mobile, setMobile] = useState(window.innerWidth <= 360);
+    const handleWindowSizeChange = () => {
+        setMobile(window.innerWidth <= 360);
+      }
+      
+      useEffect(() => {
+        window.addEventListener('resize', handleWindowSizeChange);
+        return () => {
+          window.removeEventListener('resize', handleWindowSizeChange);
+        }
+      }, []);
+      
     return (
         <div className="relative w-full">
             <select
@@ -43,7 +54,7 @@ const Select: React.FC<SelectProps> = ({
                 </option>
                 {options.map((option) => (
                     <option key={option} value={option}>
-                        {option.substring(0, 4)}...{option.substring(option.length - 4)}
+                        {option.substring(0, mobile ? 3 : 4)}...{option.substring(option.length - (mobile ? 3 : 4))}
                     </option>
                 ))}
             </select>
