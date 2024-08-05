@@ -4,6 +4,8 @@ import { to } from 'dero-xswd-api';
 import { GHOST_EXCHANGE_SCID } from '../../constants/addresses';
 import PrimaryButton from '../PrimaryButton';
 import InputField from '../InputField';
+import { useSwap } from '../../context/SwapContext';
+import { DERO_ATOMIC_UNIT_FACTOR } from '../../constants/misc';
 
 interface RemoveLiquiditySectionProps {
     pair: string;
@@ -11,7 +13,8 @@ interface RemoveLiquiditySectionProps {
 }
 
 const RemoveLiquiditySection: React.FC<RemoveLiquiditySectionProps> = ({ pair, setStatusMessage}) => {
-    const { xswd, isTransactionConfirmed } = useNetwork();
+    const { xswd, address, isTransactionConfirmed } = useNetwork();
+    const { getTotalLiquidity, tradingPairsBalances, selectedPair, getBooBalance } = useSwap();
     const [amount, setAmount] = useState('');
     const [estimatedAssets, setEstimatedAssets] = useState('');
     const [estimatedDero, setEstimatedDero] = useState('');
@@ -24,11 +27,19 @@ const RemoveLiquiditySection: React.FC<RemoveLiquiditySectionProps> = ({ pair, s
     };
 
     const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if(!selectedPair || !tradingPairsBalances || !address) return;
         const value = trimToFiveDecimals(e.target.value);
-        setAmount(value);
-        // Placeholder: Update estimated assets and dero based on the value
-        setEstimatedAssets(''); // Implement logic to estimate assets
-        setEstimatedDero(''); // Implement logic to estimate dero
+        const booBalance = getBooBalance(address);
+        const totalLiquidity =  getTotalLiquidity();
+        if(!totalLiquidity || !booBalance) return;
+        if (parseFloat(value) > booBalance){
+            setStatusMessage("Max BOO balance exceeded.");
+            setAmount(booBalance.toString());
+        } else{
+            setAmount(value);
+        }
+        setEstimatedAssets((parseFloat(value) * tradingPairsBalances[selectedPair].asset/totalLiquidity*DERO_ATOMIC_UNIT_FACTOR).toFixed(5)); 
+        setEstimatedDero((parseFloat(value) * tradingPairsBalances[selectedPair].dero/totalLiquidity*DERO_ATOMIC_UNIT_FACTOR).toFixed(5)); 
     };
 
     const handleRemoveLiquidity = async () => {

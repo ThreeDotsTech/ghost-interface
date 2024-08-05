@@ -4,6 +4,7 @@ import { useModal } from '../../context/ModalContext';
 import CreateTradingPairModalContent from '../CreatePairModalContent';
 import ManageLiquidityModalContent from '../ManageLiquidityModalContent';
 import TradingPairListButton from '../TradingPairListButton';
+import { useNetwork } from '../../context/NetworkContext';
 
 interface TradingPairsListProps {
   tradingPairs: string[] | null;
@@ -12,6 +13,7 @@ interface TradingPairsListProps {
 const TradingPairsList: React.FC<TradingPairsListProps> = ({ tradingPairs }) => {
   const { selectedPair } = useSwap();
   const { showModal, hideModal } = useModal();
+  const { connectionType } = useNetwork();
 
   const handleCreatePairClick = () => {
     showModal(<CreateTradingPairModalContent hideModal={hideModal} />);
@@ -33,7 +35,9 @@ const TradingPairsList: React.FC<TradingPairsListProps> = ({ tradingPairs }) => 
             onManageLiquidityClick={handleManageLiquidityClick}
           />
         ))}
-        <li
+        {
+          connectionType === 'XSWD' ? 
+          <li
           key={"add-pair"}
           className="ml-4 cursor-pointer border-y-4 border-l-4 pl-6 py-3 rounded-l-xl border-accent shadow-neu-accent text-black"
           title={"Create pair"}
@@ -41,6 +45,10 @@ const TradingPairsList: React.FC<TradingPairsListProps> = ({ tradingPairs }) => 
         >
           {"Create pair"}
         </li>
+        :
+        <></>
+        }
+        
       </ul>
     </div>
   );

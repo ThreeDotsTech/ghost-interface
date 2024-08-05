@@ -48,7 +48,8 @@ export type SwapContextType = {
   selectedPair: string | undefined;
   setSelectedPair: React.Dispatch<React.SetStateAction<string | undefined>>;
   executeTrade: (amount: number, swapDirection: SwapDirection, swapType: SwapType, counterAmount?: number) => Promise<string | undefined>;
-  getBooBalance: (lpAddress: string) => number | undefined
+  getBooBalance: (lpAddress: string) => number | undefined,
+  getTotalLiquidity: () => number | undefined
 }
 
 export type TradingPairBalances = {

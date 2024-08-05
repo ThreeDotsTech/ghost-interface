@@ -101,6 +101,16 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
             return 0;
         }
     };
+
+    const getTotalLiquidity = () => {
+        if (!stringkeys) return;
+        try{ // LP record may not exist
+            // Typecast, this entries will always be atomic units
+            return (stringkeys[`${selectedPair}:BOO`] as number);
+        } catch {
+            return 0;
+        }
+    }
     
     // Updates reserves every block
     useEffect(() => {
@@ -246,7 +256,8 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
                 executeTrade,
                 selectedPair, 
                 setSelectedPair,
-                getBooBalance
+                getBooBalance,
+                getTotalLiquidity
             }}>
             {children}
         </SwapContext.Provider>,
