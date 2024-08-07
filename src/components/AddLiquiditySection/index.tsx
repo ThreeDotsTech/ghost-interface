@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNetwork } from '../../context/NetworkContext';
 import { useSwap } from '../../context/SwapContext';
-import { to } from 'dero-xswd-api';
-import { DERO_SCID, GHOST_EXCHANGE_SCID } from '../../constants/addresses';
+import { gasEstimateSCArgs, to } from 'dero-xswd-api';
+import { GHOST_EXCHANGE_SCID } from '../../constants/addresses';
 import PrimaryButton from '../PrimaryButton';
 import InputField from '../InputField';
 
@@ -37,7 +37,7 @@ const AddLiquiditySection: React.FC<AddLiquiditySectionProps> = ({ pair, setStat
         const assetValue = trimToFiveDecimals(e.target.value);
         setAssetAmount(assetValue);
         if (currentRatio && assetValue) {
-            setDeroAmount((parseFloat(assetValue) * currentRatio).toFixed(5));
+            setDeroAmount((parseFloat(assetValue) * currentRatio - 0.00001 ).toFixed(5));
         } else {
             setDeroAmount('');
         }
@@ -47,7 +47,7 @@ const AddLiquiditySection: React.FC<AddLiquiditySectionProps> = ({ pair, setStat
         const deroValue = trimToFiveDecimals(e.target.value);
         setDeroAmount(deroValue);
         if (currentRatio && deroValue) {
-            setAssetAmount((parseFloat(deroValue) / currentRatio).toFixed(5));
+            setAssetAmount((parseFloat(deroValue) / currentRatio + 0.00001).toFixed(5));
         } else {
             setAssetAmount('');
         }
@@ -62,20 +62,26 @@ const AddLiquiditySection: React.FC<AddLiquiditySectionProps> = ({ pair, setStat
         setButtonDisabled(true);
         setStatusMessage('Processing transaction...');
         
-        const assetAmountNum = Math.round(parseFloat(assetAmount) * 1e5); 
+        const assetAmountNum = Math.round(parseFloat(assetAmount) * 1e5 ); 
         const deroAmountNum = Math.round(parseFloat(deroAmount) * 1e5); 
 
         const response = await xswd.wallet.transfer({
             scid: GHOST_EXCHANGE_SCID, 
             transfers: [
-                { scid: pair, burn: assetAmountNum },
-                { scid: DERO_SCID, burn: deroAmountNum }, 
+                // The "destination" parameter requires a valid DERO address DIFFERENT FROM THE SENDER'S but, in this context, it serves solely
+                // to satisfy the RPC syntax. Rest assured, the DERO specified will be transferred to the Smart Contract, not the random address provided.
+                // In this case, the random address used is Captain's address, as disclosed in the genesis block:
+                // https://github.com/deroproject/derohe/blob/e9df1205b6603c62f0651d0e18e5e77a2584b15e/config/config.go#L103C28-L103C94
+                { burn: deroAmountNum, destination: "dero1qykyta6ntpd27nl0yq4xtzaf4ls6p5e9pqu0k2x4x3pqq5xavjsdxqgny8270" },
+                { scid: pair, burn: assetAmountNum }
             ],
-            sc_rpc: [
-                { name: 'entrypoint', datatype: 'S', value: 'AddLiquidity' },
-                { name: 't', datatype: 'S', value: pair },
-                { name: 'u', datatype: 'U', value: 1 },
-            ],
+            sc_rpc: gasEstimateSCArgs(
+                GHOST_EXCHANGE_SCID,
+                "AddLiquidity", [
+                    { name: "u",  value: 1 },
+                    { name: "t", value: pair },
+
+            ]),
             ringsize: 2,
         });
 

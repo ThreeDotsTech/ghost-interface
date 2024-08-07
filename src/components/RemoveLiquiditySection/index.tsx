@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNetwork } from '../../context/NetworkContext';
-import { to } from 'dero-xswd-api';
+import { gasEstimateSCArgs, to } from 'dero-xswd-api';
 import { GHOST_EXCHANGE_SCID } from '../../constants/addresses';
 import PrimaryButton from '../PrimaryButton';
 import InputField from '../InputField';
@@ -57,13 +57,15 @@ const RemoveLiquiditySection: React.FC<RemoveLiquiditySectionProps> = ({ pair, s
 
         const response = await xswd.wallet.scinvoke({
             scid: GHOST_EXCHANGE_SCID,
-            sc_rpc: [
-                { name: 'entrypoint', datatype: 'S', value: 'RemoveLiquidity' },
-                { name: 't', datatype: 'S', value: pair },
-                { name: 'v', datatype: 'U', value: amountNum },
-                { name: 'w', datatype: 'U', value: 1 },
-                { name: 'y2', datatype: 'U', value: 1 },
-            ],
+            sc_rpc: gasEstimateSCArgs(
+                GHOST_EXCHANGE_SCID,
+                "RemoveLiquidity", [
+                    { name: 't', value: pair },
+                    { name: 'v', value: amountNum },
+                    { name: 'w', value: 1 },
+                    { name: 'y2', value: 1 },
+
+            ]),
             ringsize: 2,
         });
 

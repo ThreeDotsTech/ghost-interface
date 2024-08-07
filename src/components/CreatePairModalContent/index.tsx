@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNetwork } from '../../context/NetworkContext';
-import { to } from 'dero-xswd-api';
-import { DERO_SCID, GHOST_EXCHANGE_SCID } from '../../constants/addresses';
+import { gasEstimateSCArgs, to } from 'dero-xswd-api';
+import { GHOST_EXCHANGE_SCID } from '../../constants/addresses';
 import InputField from '../InputField';
 import PrimaryButton from '../PrimaryButton';
 
@@ -39,16 +39,22 @@ const CreateTradingPairModalContent: React.FC = () => {
         const deroAmountNum = Math.round(parseFloat(deroAmount) * 1e5);
 
         const response = await xswd.wallet.transfer({
-            scid: GHOST_EXCHANGE_SCID, // Replace with actual SCID
+            scid: GHOST_EXCHANGE_SCID,
             transfers: [
+                // The "destination" parameter requires a valid DERO address DIFFERENT FROM THE SENDER'S but, in this context, it serves solely
+                // to satisfy the RPC syntax. Rest assured, the DERO specified will be transferred to the Smart Contract, not the random address provided.
+                // In this case, the random address used is Captain's address, as disclosed in the genesis block:
+                // https://github.com/deroproject/derohe/blob/e9df1205b6603c62f0651d0e18e5e77a2584b15e/config/config.go#L103C28-L103C94
+                { burn: deroAmountNum, destination: "dero1qykyta6ntpd27nl0yq4xtzaf4ls6p5e9pqu0k2x4x3pqq5xavjsdxqgny8270" },
                 { scid: assetSCID, burn: assetAmountNum },
-                { scid: DERO_SCID, burn: deroAmountNum }, // Replace with actual DERO SCID
             ],
-            sc_rpc: [
-                { name: 'entrypoint', datatype: 'S', value: 'AddLiquidity' },
-                { name: 't', datatype: 'S', value: assetSCID },
-                { name: 'u', datatype: 'U', value: 1 },
-            ],
+            sc_rpc: gasEstimateSCArgs(
+                GHOST_EXCHANGE_SCID,
+                "AddLiquidity", [
+                    { name: "u",  value: 1 },
+                    { name: "t", value: assetSCID },
+
+            ]),
             ringsize: 2,
         });
 
