@@ -6,12 +6,10 @@ import ManageLiquidityModalContent from '../ManageLiquidityModalContent';
 import TradingPairListButton from '../TradingPairListButton';
 import { useNetwork } from '../../context/NetworkContext';
 
-interface TradingPairsListProps {
-  tradingPairs: string[] | null;
-}
+interface TradingPairsListProps {}
 
-const TradingPairsList: React.FC<TradingPairsListProps> = ({ tradingPairs }) => {
-  const { selectedPair } = useSwap();
+const TradingPairsList: React.FC<TradingPairsListProps> = () => {
+  const { selectedPair, tradingPairs } = useSwap();
   const { showModal } = useModal();
   const { connectionType } = useNetwork();
 
@@ -27,10 +25,10 @@ const TradingPairsList: React.FC<TradingPairsListProps> = ({ tradingPairs }) => 
     <div className="pt-4 pb-6 w-72 bg-white shadow-lg border-y-4 border-l-4 border-black">
       <h2 className="text-xl font-semibold mb-4 text-gray-800 pl-6">Trading Pairs</h2>
       <ul className="space-y-4">
-        {tradingPairs?.map(pair => (
+        {Object.entries(tradingPairs ?? {}).map(([pairKey, tradingPair]) => (
           <TradingPairListButton
-            key={pair}
-            pair={pair}
+            key={pairKey}
+            tradingPair={{ ...tradingPair, key: pairKey }}
             selectedPair={selectedPair}
             onManageLiquidityClick={handleManageLiquidityClick}
           />
@@ -38,17 +36,16 @@ const TradingPairsList: React.FC<TradingPairsListProps> = ({ tradingPairs }) => 
         {
           connectionType === 'XSWD' ? 
           <li
-          key={"add-pair"}
-          className="ml-4 cursor-pointer border-y-4 border-l-4 pl-6 py-3 rounded-l-xl border-accent shadow-neu-accent text-black"
-          title={"Create pair"}
-          onClick={handleCreatePairClick}
-        >
-          {"Create pair"}
-        </li>
-        :
-        <></>
+            key={"add-pair"}
+            className="ml-4 cursor-pointer border-y-4 border-l-4 pl-6 py-3 rounded-l-xl border-accent shadow-neu-accent text-black font-semibold text-lg"
+            title={"Create pair"}
+            onClick={handleCreatePairClick}
+          >
+            {"Create pair"}
+          </li>
+          :
+          <></>
         }
-        
       </ul>
     </div>
   );

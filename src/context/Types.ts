@@ -43,8 +43,7 @@ export type NetworkContextType = {
 }
 
 export type SwapContextType = {
-  tradingPairs: string[] | null;
-  tradingPairsBalances: TradingPairBalances | null;
+  tradingPairs: TradingPairsList | null;
   selectedPair: string | undefined;
   setSelectedPair: React.Dispatch<React.SetStateAction<string | undefined>>;
   executeTrade: (amount: number, swapDirection: SwapDirection, swapType: SwapType, counterAmount?: number) => Promise<string | undefined>;
@@ -52,9 +51,10 @@ export type SwapContextType = {
   getTotalLiquidity: () => number | undefined
 }
 
-export type TradingPairBalances = {
+export type TradingPairsList = {
   [address: string]: {
-      asset: number;
-      dero: number;
+      name?: string;
+      asset_balance: number;
+      dero_balance: number;
   };
 }

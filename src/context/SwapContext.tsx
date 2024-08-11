@@ -1,9 +1,9 @@
 import { createContext, useContext, useState, ReactNode, useEffect, useMemo, useCallback } from 'react';
-import { gasEstimateSCArgs, to } from "dero-xswd-api";
-import { SwapContextType, SwapDirection, SwapType, TradingPairBalances } from './Types';
+import { DEROGetSCResult, ErrorResponse, gasEstimateSCArgs, to } from "dero-xswd-api";
+import { SwapContextType, SwapDirection, SwapType, TradingPairsList } from './Types';
 import { GHOST_EXCHANGE_SCID } from '../constants/addresses';
 import { useNetwork } from './NetworkContext';
-import { getAddressKeys, isEqual } from '../utils';
+import { getAddressKeys, getAssetNameHeader, shallowEqual } from '../utils';
 import { useHistory } from 'react-router-dom';
 
 const SwapContext = createContext<SwapContextType | undefined>(undefined);
@@ -19,69 +19,85 @@ export const useSwap = () => {
 };
 
 
-
 export const SwapProvider = ({ children }: { children: ReactNode }) => {
     const {xswd, blockInfo} = useNetwork();
     // List of all the SCIDs of assets with a trading pair in Ghost
-    const [tradingPairs, setTradingPairs] = useState<string[] | null>(null)
-    const [balances, setBalances] = useState<TradingPairBalances>({});
+    const [assetsList, setAssetsList] = useState<string[] | null>(null)
+    const [tradingPairs, setTradingPairs] = useState<TradingPairsList>({});
     const [selectedPair, setSelectedPair] = useState<string | undefined>(undefined);
+    const [hasFetchedNames, setHasFetchedNames] = useState(false);
     const [stringkeys, setStringKeys] = useState<{
         [k: string]: string | number;
         C: string;
     } | undefined>(undefined);
     const history = useHistory();
-    // Get Ghost SC info.
-    const  getContractInfo = async () => {
-        if (!xswd) return;
+
+    const  getContractInfo = async (scid: string): Promise<[ErrorResponse | undefined, DEROGetSCResult | undefined]>  => {
+        if (!xswd) return [undefined, undefined];
         const response = await xswd.node.GetSC(
             {
-              scid: GHOST_EXCHANGE_SCID,
+              scid,
               code: false,
               variables: true,
             }, false);
         const [_, contract] = to<"daemon", "DERO.GetSC">(response);
+        return [_, contract]
+    }
+
+    // Get Ghost SC info.
+    const  getGhostInfo = async () => {
+        const [_, contract] = await getContractInfo(GHOST_EXCHANGE_SCID);
         const stringkeys = contract?.stringkeys;
 
         setStringKeys(stringkeys);
         if (stringkeys) {
             const addressKeys = getAddressKeys(stringkeys);
-            if (JSON.stringify(tradingPairs && tradingPairs.sort()) !== JSON.stringify(addressKeys.sort())) {
+            if (JSON.stringify(assetsList && assetsList.sort()) !== JSON.stringify(addressKeys.sort())) {
                 console.log("Updating Trading Pairs")
-                setTradingPairs(addressKeys);
+                setAssetsList(addressKeys);
             }
 
         } else {
-            setTradingPairs(null);
+            setAssetsList(null);
         }      
     }
 
     // Parses the contents of all balances keys from SC info.
-    const fetchBalances = (addressKeys: string[]) => {
+    const updateBalances = (addressKeys: string[]) => {
         if (!stringkeys) return;
-        const newBalances: TradingPairBalances = {};
+    
+        const newBalances: TradingPairsList = { ...tradingPairs }; // Start with the current state
     
         addressKeys.forEach((address) => {
-            const assetBalance = stringkeys[address];
-            const deroBalance = stringkeys[`${address}:DERO`];
+        const assetBalance = stringkeys[address];
+        const deroBalance = stringkeys[`${address}:DERO`];
     
-            newBalances[address] = {
-                asset: assetBalance as number ?? 0,
-                dero: deroBalance as number ?? 0,
-            };
+        // Preserve the existing name if it exists
+        newBalances[address] = {
+            ...newBalances[address], // Spread existing data to preserve `name`
+            asset_balance: assetBalance as number ?? 0,
+            dero_balance: deroBalance as number ?? 0,
+        };
         });
-        if (!isEqual(balances, newBalances)) {
-            setBalances(newBalances);
-          }
+    
+        // Check if tradingPairs and newBalances are different
+        const isDifferent = Object.keys(newBalances).some(
+        (key) => !shallowEqual(newBalances[key], tradingPairs[key])
+        );
+    
+        if (isDifferent) {
+            setTradingPairs(newBalances);
+            setHasFetchedNames(false);
+        }
     };
 
     // Set the initial selected trading pair
     useEffect(() => {
-        if (tradingPairs && tradingPairs.length > 0 && !selectedPair) {
-        const defaultPair = tradingPairs[0];
+        if (assetsList && assetsList.length > 0 && !selectedPair) {
+        const defaultPair = assetsList[0];
         setSelectedPair(defaultPair);
         }
-    }, [tradingPairs, selectedPair, history, setSelectedPair]);
+    }, [assetsList, selectedPair, history, setSelectedPair]);
 
     // Update dom route on selected pair change
     useEffect(() => {
@@ -89,6 +105,7 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
         console.log("selected pair updated:", selectedPair)
         history.replace(`/${selectedPair}`);
     }, [ selectedPair, history]);
+
 
     // Gets the balance of Boo tokens of an address for a given trading pair,
     // given by the pair's asset's SCID
@@ -112,17 +129,39 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
         }
     }
     
-    // Updates reserves every block
+    // Updates trading pairs info every block
     useEffect(() => {
         async function updateGhostBalances() {
-            if (!tradingPairs) return;
-            await getContractInfo();
-            fetchBalances(tradingPairs);
+            if (!assetsList) return;
+            await getGhostInfo();
+            updateBalances(assetsList);
         }
 
         updateGhostBalances()
-      }, [blockInfo, tradingPairs])
-
+    }, [blockInfo, assetsList])
+    
+    useEffect(() => {
+        async function fetchAssetNames() {
+          if (!Object.keys(tradingPairs).length || hasFetchedNames) return;
+      
+          const updatedTradingPairs = { ...tradingPairs };
+      
+          for (const address in updatedTradingPairs) {
+            const [_, contract] = await getContractInfo(address);
+            const stringkeys = contract?.stringkeys;
+            if (!stringkeys) continue;
+            const name = getAssetNameHeader(stringkeys);
+            if (name) {
+              updatedTradingPairs[address].name = name;
+            }
+          }
+      
+          setTradingPairs(updatedTradingPairs);
+          setHasFetchedNames(true);
+        }
+      
+        fetchAssetNames();
+      }, [tradingPairs, hasFetchedNames]);
 
     // Function exposed by provider to execute swaps on the current trading pair.
     const executeTrade = useCallback(async (amount: number, swapDirection: SwapDirection, swapType: SwapType, counterAmount?: number): Promise<string | undefined> => {
@@ -242,8 +281,8 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
     //TODO: Handle sad path.
     useEffect(() => {
         if (!xswd || !xswd.connection.fallback) return;
-        if (tradingPairs == null) {
-            getContractInfo();
+        if (assetsList == null) {
+            getGhostInfo();
         }
 
     }, [xswd, xswd?.connection.fallback]);
@@ -251,8 +290,7 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
     return useMemo(()=> 
         <SwapContext.Provider
             value={{
-                tradingPairs:  tradingPairs ?? null,
-                tradingPairsBalances: balances ?? null,
+                tradingPairs: tradingPairs ?? null,
                 executeTrade,
                 selectedPair, 
                 setSelectedPair,
@@ -261,5 +299,5 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
             }}>
             {children}
         </SwapContext.Provider>,
-        [tradingPairs, balances, selectedPair, setSelectedPair]);
+        [assetsList, tradingPairs, selectedPair, setSelectedPair]);
   };
