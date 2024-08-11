@@ -204,10 +204,8 @@ const SwapForm: React.FC = () => {
     if(parseFloat(assetValue) == 0 && parseFloat(deroValue) == 0) return;
     console.log("Recalculating values...")
     if (lastInput === LastInput.ASSET){
-      console.log("Last was asset: ", assetValue);
       handleAssetValueChange(assetValue);
     } else{
-      console.log("Last was Dero:", deroValue)
       handleDeroValueChange(deroValue);
     }
   }, [assetReserve]); // Could be any reserve
@@ -248,13 +246,17 @@ const SwapForm: React.FC = () => {
         />
         <div className="relative flex flex-col w-5/12">
           <Select
-            additionalClasses = {'w-full'}
+            additionalClasses={'w-full'}
             value={selectedPair ?? 'WTF'}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               setSelectedPair(e.target.value);
             }}
-            options={Object.keys(tradingPairs ?? [])}
+            options={Object.entries(tradingPairs ?? {}).map(([key, tradingPair]) => ({
+              value: key, // The value will be the key (address)
+              label: tradingPair.name ?? key, // Display the name if available, otherwise the key
+            }))}
           />
+
           <div className='pl-1 mt-2 text-sm text-gray-700  absolute top-12 sm:top-16 left-0'>
             {selectedPair && walletInfo.balances[selectedPair] ? "Balance: " + atomicUnitsToString(walletInfo.balances[selectedPair] as number) : ""}
           </div>

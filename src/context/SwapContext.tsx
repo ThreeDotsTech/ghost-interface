@@ -3,7 +3,7 @@ import { DEROGetSCResult, ErrorResponse, gasEstimateSCArgs, to } from "dero-xswd
 import { SwapContextType, SwapDirection, SwapType, TradingPairsList } from './Types';
 import { GHOST_EXCHANGE_SCID } from '../constants/addresses';
 import { useNetwork } from './NetworkContext';
-import { getAddressKeys, isEqual } from '../utils';
+import { getAddressKeys, getAssetNameHeader, isEqual, shallowEqual } from '../utils';
 import { useHistory } from 'react-router-dom';
 
 const SwapContext = createContext<SwapContextType | undefined>(undefined);
@@ -25,6 +25,7 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
     const [assetsList, setAssetsList] = useState<string[] | null>(null)
     const [tradingPairs, setTradingPairs] = useState<TradingPairsList>({});
     const [selectedPair, setSelectedPair] = useState<string | undefined>(undefined);
+    const [hasFetchedNames, setHasFetchedNames] = useState(false);
     const [stringkeys, setStringKeys] = useState<{
         [k: string]: string | number;
         C: string;
@@ -62,22 +63,32 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
     }
 
     // Parses the contents of all balances keys from SC info.
-    const fetchBalances = (addressKeys: string[]) => {
+    const updateBalances = (addressKeys: string[]) => {
         if (!stringkeys) return;
-        const newBalances: TradingPairsList = {};
+    
+        const newBalances: TradingPairsList = { ...tradingPairs }; // Start with the current state
     
         addressKeys.forEach((address) => {
-            const assetBalance = stringkeys[address];
-            const deroBalance = stringkeys[`${address}:DERO`];
+        const assetBalance = stringkeys[address];
+        const deroBalance = stringkeys[`${address}:DERO`];
     
-            newBalances[address] = {
-                asset_balance: assetBalance as number ?? 0,
-                dero_balance: deroBalance as number ?? 0,
-            };
+        // Preserve the existing name if it exists
+        newBalances[address] = {
+            ...newBalances[address], // Spread existing data to preserve `name`
+            asset_balance: assetBalance as number ?? 0,
+            dero_balance: deroBalance as number ?? 0,
+        };
         });
-        if (!isEqual(tradingPairs, newBalances)) {
+    
+        // Check if tradingPairs and newBalances are different
+        const isDifferent = Object.keys(newBalances).some(
+        (key) => !shallowEqual(newBalances[key], tradingPairs[key])
+        );
+    
+        if (isDifferent) {
             setTradingPairs(newBalances);
-          }
+            setHasFetchedNames(false);
+        }
     };
 
     // Set the initial selected trading pair
@@ -118,17 +129,39 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
         }
     }
     
-    // Updates reserves every block
+    // Updates trading pairs info every block
     useEffect(() => {
         async function updateGhostBalances() {
             if (!assetsList) return;
             await getGhostInfo();
-            fetchBalances(assetsList);
+            updateBalances(assetsList);
         }
 
         updateGhostBalances()
-      }, [blockInfo, assetsList])
-
+    }, [blockInfo, assetsList])
+    
+    useEffect(() => {
+        async function fetchAssetNames() {
+          if (!Object.keys(tradingPairs).length || hasFetchedNames) return;
+      
+          const updatedTradingPairs = { ...tradingPairs };
+      
+          for (const address in updatedTradingPairs) {
+            const [_, contract] = await getContractInfo(address);
+            const stringkeys = contract?.stringkeys;
+            if (!stringkeys) continue;
+            const name = getAssetNameHeader(stringkeys);
+            if (name) {
+              updatedTradingPairs[address].name = name;
+            }
+          }
+      
+          setTradingPairs(updatedTradingPairs);
+          setHasFetchedNames(true);
+        }
+      
+        fetchAssetNames();
+      }, [tradingPairs, hasFetchedNames]);
 
     // Function exposed by provider to execute swaps on the current trading pair.
     const executeTrade = useCallback(async (amount: number, swapDirection: SwapDirection, swapType: SwapType, counterAmount?: number): Promise<string | undefined> => {

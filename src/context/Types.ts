@@ -53,6 +53,7 @@ export type SwapContextType = {
 
 export type TradingPairsList = {
   [address: string]: {
+      name?: string;
       asset_balance: number;
       dero_balance: number;
   };
