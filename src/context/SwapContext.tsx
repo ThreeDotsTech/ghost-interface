@@ -3,7 +3,7 @@ import { DEROGetSCResult, ErrorResponse, gasEstimateSCArgs, to } from "dero-xswd
 import { SwapContextType, SwapDirection, SwapType, TradingPairsList } from './Types';
 import { GHOST_EXCHANGE_SCID } from '../constants/addresses';
 import { useNetwork } from './NetworkContext';
-import { getAddressKeys, getAssetNameHeader, isEqual, shallowEqual } from '../utils';
+import { getAddressKeys, getAssetNameHeader, shallowEqual } from '../utils';
 import { useHistory } from 'react-router-dom';
 
 const SwapContext = createContext<SwapContextType | undefined>(undefined);
