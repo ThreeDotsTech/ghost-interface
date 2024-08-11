@@ -1,5 +1,5 @@
 diff --git a/node_modules/dero-xswd-api/dist/index.d.ts b/node_modules/dero-xswd-api/dist/index.d.ts
-index ca42002..aa187be 100644
+index ca42002..faa9528 100644
 --- a/node_modules/dero-xswd-api/dist/index.d.ts
 +++ b/node_modules/dero-xswd-api/dist/index.d.ts
 @@ -217,7 +217,7 @@ type Network = "Simulator" | "Testnet" | "Mainnet";
@@ -11,6 +11,15 @@ index ca42002..aa187be 100644
      alt_blocks_count: Uint64;
      difficulty: Uint64;
      grey_peerlist_size: number;
+@@ -357,7 +357,7 @@ type GetTransferByTXIDResult = {
+     entry: Entry;
+     scid: Hash;
+ };
+-type DEROGetSCResult = {
++export type DEROGetSCResult = {
+     valuesuint64: DVMString[];
+     valuesstring: DVMString[];
+     valuesbytes: DVMString[];
 @@ -484,7 +484,7 @@ declare class Api {
          GetLastBlockHeader(): Promise<Response<"daemon", "DERO.GetLastBlockHeader", "error"> | Response<"daemon", "DERO.GetLastBlockHeader", "result">>;
          GetBlockTemplate(params: DEROGetBlockTemplate): Promise<Response<"daemon", "DERO.GetBlockTemplate", "error"> | Response<"daemon", "DERO.GetBlockTemplate", "result">>;
