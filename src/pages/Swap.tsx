@@ -10,7 +10,7 @@ import { useParams } from "react-router-dom";
 function Swap() {
   
   const {theme} = useTheme();
-  const { setSelectedPair, tradingPairs } = useSwap();
+  const { setSelectedPair } = useSwap();
   const { address } = useParams<{ address: string }>();
 
     // Update dom route on selected pair change
@@ -32,7 +32,7 @@ function Swap() {
         </div>
       </div>
       <div className="hidden lg:flex sm mt-20 xl:mt-10">
-        <TradingPairsList tradingPairs={tradingPairs} />
+        <TradingPairsList />
       </div>
     </div>
   );

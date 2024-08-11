@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, ReactNode, useEffect, useMemo, useCallback } from 'react';
 import { DEROGetSCResult, ErrorResponse, gasEstimateSCArgs, to } from "dero-xswd-api";
-import { SwapContextType, SwapDirection, SwapType, TradingPairBalances } from './Types';
+import { SwapContextType, SwapDirection, SwapType, TradingPairsList } from './Types';
 import { GHOST_EXCHANGE_SCID } from '../constants/addresses';
 import { useNetwork } from './NetworkContext';
 import { getAddressKeys, isEqual } from '../utils';
@@ -23,8 +23,8 @@ export const useSwap = () => {
 export const SwapProvider = ({ children }: { children: ReactNode }) => {
     const {xswd, blockInfo} = useNetwork();
     // List of all the SCIDs of assets with a trading pair in Ghost
-    const [tradingPairs, setTradingPairs] = useState<string[] | null>(null)
-    const [balances, setBalances] = useState<TradingPairBalances>({});
+    const [assetsList, setAssetsList] = useState<string[] | null>(null)
+    const [balances, setBalances] = useState<TradingPairsList>({});
     const [selectedPair, setSelectedPair] = useState<string | undefined>(undefined);
     const [stringkeys, setStringKeys] = useState<{
         [k: string]: string | number;
@@ -52,28 +52,28 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
         setStringKeys(stringkeys);
         if (stringkeys) {
             const addressKeys = getAddressKeys(stringkeys);
-            if (JSON.stringify(tradingPairs && tradingPairs.sort()) !== JSON.stringify(addressKeys.sort())) {
+            if (JSON.stringify(assetsList && assetsList.sort()) !== JSON.stringify(addressKeys.sort())) {
                 console.log("Updating Trading Pairs")
-                setTradingPairs(addressKeys);
+                setAssetsList(addressKeys);
             }
 
         } else {
-            setTradingPairs(null);
+            setAssetsList(null);
         }      
     }
 
     // Parses the contents of all balances keys from SC info.
     const fetchBalances = (addressKeys: string[]) => {
         if (!stringkeys) return;
-        const newBalances: TradingPairBalances = {};
+        const newBalances: TradingPairsList = {};
     
         addressKeys.forEach((address) => {
             const assetBalance = stringkeys[address];
             const deroBalance = stringkeys[`${address}:DERO`];
     
             newBalances[address] = {
-                asset: assetBalance as number ?? 0,
-                dero: deroBalance as number ?? 0,
+                asset_balance: assetBalance as number ?? 0,
+                dero_balance: deroBalance as number ?? 0,
             };
         });
         if (!isEqual(balances, newBalances)) {
@@ -83,11 +83,11 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
 
     // Set the initial selected trading pair
     useEffect(() => {
-        if (tradingPairs && tradingPairs.length > 0 && !selectedPair) {
-        const defaultPair = tradingPairs[0];
+        if (assetsList && assetsList.length > 0 && !selectedPair) {
+        const defaultPair = assetsList[0];
         setSelectedPair(defaultPair);
         }
-    }, [tradingPairs, selectedPair, history, setSelectedPair]);
+    }, [assetsList, selectedPair, history, setSelectedPair]);
 
     // Update dom route on selected pair change
     useEffect(() => {
@@ -122,13 +122,13 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
     // Updates reserves every block
     useEffect(() => {
         async function updateGhostBalances() {
-            if (!tradingPairs) return;
+            if (!assetsList) return;
             await getGhostInfo();
-            fetchBalances(tradingPairs);
+            fetchBalances(assetsList);
         }
 
         updateGhostBalances()
-      }, [blockInfo, tradingPairs])
+      }, [blockInfo, assetsList])
 
 
     // Function exposed by provider to execute swaps on the current trading pair.
@@ -249,7 +249,7 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
     //TODO: Handle sad path.
     useEffect(() => {
         if (!xswd || !xswd.connection.fallback) return;
-        if (tradingPairs == null) {
+        if (assetsList == null) {
             getGhostInfo();
         }
 
@@ -258,8 +258,7 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
     return useMemo(()=> 
         <SwapContext.Provider
             value={{
-                tradingPairs:  tradingPairs ?? null,
-                tradingPairsBalances: balances ?? null,
+                tradingPairs: balances ?? null,
                 executeTrade,
                 selectedPair, 
                 setSelectedPair,
@@ -268,5 +267,5 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
             }}>
             {children}
         </SwapContext.Provider>,
-        [tradingPairs, balances, selectedPair, setSelectedPair]);
+        [assetsList, balances, selectedPair, setSelectedPair]);
   };

@@ -13,19 +13,19 @@ interface AddLiquiditySectionProps {
 
 const AddLiquiditySection: React.FC<AddLiquiditySectionProps> = ({ pair, setStatusMessage }) => {
     const { xswd, isTransactionConfirmed } = useNetwork();
-    const { tradingPairsBalances, selectedPair } = useSwap();
+    const { tradingPairs, selectedPair } = useSwap();
     const [assetAmount, setAssetAmount] = useState('');
     const [deroAmount, setDeroAmount] = useState('');
     const [currentRatio, setCurrentRatio] = useState<number>(0);
     const [buttonDisabled, setButtonDisabled] = useState(false);
 
     useEffect(() => {
-        if (!tradingPairsBalances) return;
-        if (selectedPair && tradingPairsBalances[selectedPair]) {
-            const { dero, asset } = tradingPairsBalances[selectedPair];
-            setCurrentRatio(dero / asset);
+        if (!tradingPairs) return;
+        if (selectedPair && tradingPairs[selectedPair]) {
+            const { dero_balance, asset_balance } = tradingPairs[selectedPair];
+            setCurrentRatio(dero_balance / asset_balance);
         }
-    }, [selectedPair, tradingPairsBalances]);
+    }, [selectedPair, tradingPairs]);
 
     const trimToFiveDecimals = (value: string): string => {
         const [integerPart, decimalPart] = value.split('.');

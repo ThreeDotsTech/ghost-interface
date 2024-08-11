@@ -28,7 +28,7 @@ const SwapForm: React.FC = () => {
   const [errorMessageTimeoutId, setErrorMessageTimeoutId] = useState<NodeJS.Timeout | undefined>(undefined);
   const [assetReserve, setAssetReserve] = useState<number | undefined>();
   const [deroReserve, setDeroReserve] = useState<number | undefined>();
-  const { tradingPairs, tradingPairsBalances, selectedPair, setSelectedPair, executeTrade } = useSwap(); // Retrieve executeTrade
+  const { tradingPairs, selectedPair, setSelectedPair, executeTrade } = useSwap(); // Retrieve executeTrade
   const { walletInfo, xswd, connectionType, isTransactionConfirmed } = useNetwork();
 
   const [swapButtonDisabled, setSwapButtonDisabled] = useState<boolean>(false);
@@ -42,13 +42,13 @@ const SwapForm: React.FC = () => {
 
   // Update selected pair price
   useEffect(() => {
-    if (!selectedPair || !tradingPairsBalances) return;
-    if (!tradingPairsBalances[selectedPair]) return;
-    const numerator = tradingPairsBalances[selectedPair].dero;
+    if (!selectedPair || !tradingPairs) return;
+    if (!tradingPairs[selectedPair]) return;
+    const numerator = tradingPairs[selectedPair].dero_balance;
     setDeroReserve(numerator);
-    const denominator = tradingPairsBalances[selectedPair].asset;
+    const denominator = tradingPairs[selectedPair].asset_balance;
     setAssetReserve(denominator);
-  }, [selectedPair, tradingPairsBalances, setAssetReserve, setDeroReserve]);
+  }, [selectedPair, tradingPairs, setAssetReserve, setDeroReserve]);
 
   // Function to handle asset input changes
   const handleAssetValueChange = useCallback((inputValue: string, updatedDirection?: SwapDirection) => {
@@ -253,7 +253,7 @@ const SwapForm: React.FC = () => {
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               setSelectedPair(e.target.value);
             }}
-            options={tradingPairs ?? []}
+            options={Object.keys(tradingPairs ?? [])}
           />
           <div className='pl-1 mt-2 text-sm text-gray-700  absolute top-12 sm:top-16 left-0'>
             {selectedPair && walletInfo.balances[selectedPair] ? "Balance: " + atomicUnitsToString(walletInfo.balances[selectedPair] as number) : ""}

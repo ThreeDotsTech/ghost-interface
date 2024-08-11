@@ -14,7 +14,7 @@ interface RemoveLiquiditySectionProps {
 
 const RemoveLiquiditySection: React.FC<RemoveLiquiditySectionProps> = ({ pair, setStatusMessage}) => {
     const { xswd, address, isTransactionConfirmed } = useNetwork();
-    const { getTotalLiquidity, tradingPairsBalances, selectedPair, getBooBalance } = useSwap();
+    const { getTotalLiquidity, tradingPairs, selectedPair, getBooBalance } = useSwap();
     const [amount, setAmount] = useState('');
     const [estimatedAssets, setEstimatedAssets] = useState('');
     const [estimatedDero, setEstimatedDero] = useState('');
@@ -27,7 +27,7 @@ const RemoveLiquiditySection: React.FC<RemoveLiquiditySectionProps> = ({ pair, s
     };
 
     const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if(!selectedPair || !tradingPairsBalances || !address) return;
+        if(!selectedPair || !tradingPairs || !address) return;
         const value = trimToFiveDecimals(e.target.value);
         const booBalance = getBooBalance(address);
         const totalLiquidity =  getTotalLiquidity();
@@ -38,8 +38,8 @@ const RemoveLiquiditySection: React.FC<RemoveLiquiditySectionProps> = ({ pair, s
         } else{
             setAmount(value);
         }
-        setEstimatedAssets((parseFloat(value) * tradingPairsBalances[selectedPair].asset/totalLiquidity*DERO_ATOMIC_UNIT_FACTOR).toFixed(5)); 
-        setEstimatedDero((parseFloat(value) * tradingPairsBalances[selectedPair].dero/totalLiquidity*DERO_ATOMIC_UNIT_FACTOR).toFixed(5)); 
+        setEstimatedAssets((parseFloat(value) * tradingPairs[selectedPair].asset_balance/totalLiquidity*DERO_ATOMIC_UNIT_FACTOR).toFixed(5)); 
+        setEstimatedDero((parseFloat(value) * tradingPairs[selectedPair].dero_balance/totalLiquidity*DERO_ATOMIC_UNIT_FACTOR).toFixed(5)); 
     };
 
     const handleRemoveLiquidity = async () => {
