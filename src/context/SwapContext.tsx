@@ -19,12 +19,11 @@ export const useSwap = () => {
 };
 
 
-
 export const SwapProvider = ({ children }: { children: ReactNode }) => {
     const {xswd, blockInfo} = useNetwork();
     // List of all the SCIDs of assets with a trading pair in Ghost
     const [assetsList, setAssetsList] = useState<string[] | null>(null)
-    const [balances, setBalances] = useState<TradingPairsList>({});
+    const [tradingPairs, setTradingPairs] = useState<TradingPairsList>({});
     const [selectedPair, setSelectedPair] = useState<string | undefined>(undefined);
     const [stringkeys, setStringKeys] = useState<{
         [k: string]: string | number;
@@ -76,8 +75,8 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
                 dero_balance: deroBalance as number ?? 0,
             };
         });
-        if (!isEqual(balances, newBalances)) {
-            setBalances(newBalances);
+        if (!isEqual(tradingPairs, newBalances)) {
+            setTradingPairs(newBalances);
           }
     };
 
@@ -258,7 +257,7 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
     return useMemo(()=> 
         <SwapContext.Provider
             value={{
-                tradingPairs: balances ?? null,
+                tradingPairs: tradingPairs ?? null,
                 executeTrade,
                 selectedPair, 
                 setSelectedPair,
@@ -267,5 +266,5 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
             }}>
             {children}
         </SwapContext.Provider>,
-        [assetsList, balances, selectedPair, setSelectedPair]);
+        [assetsList, tradingPairs, selectedPair, setSelectedPair]);
   };
