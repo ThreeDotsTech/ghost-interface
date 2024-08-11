@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, ReactNode, useEffect, useMemo, useCallback } from 'react';
-import { gasEstimateSCArgs, to } from "dero-xswd-api";
+import { DEROGetSCResult, ErrorResponse, gasEstimateSCArgs, to } from "dero-xswd-api";
 import { SwapContextType, SwapDirection, SwapType, TradingPairBalances } from './Types';
 import { GHOST_EXCHANGE_SCID } from '../constants/addresses';
 import { useNetwork } from './NetworkContext';
@@ -31,16 +31,22 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
         C: string;
     } | undefined>(undefined);
     const history = useHistory();
-    // Get Ghost SC info.
-    const  getContractInfo = async () => {
-        if (!xswd) return;
+
+    const  getContractInfo = async (scid: string): Promise<[ErrorResponse | undefined, DEROGetSCResult | undefined]>  => {
+        if (!xswd) return [undefined, undefined];
         const response = await xswd.node.GetSC(
             {
-              scid: GHOST_EXCHANGE_SCID,
+              scid,
               code: false,
               variables: true,
             }, false);
         const [_, contract] = to<"daemon", "DERO.GetSC">(response);
+        return [_, contract]
+    }
+
+    // Get Ghost SC info.
+    const  getGhostInfo = async () => {
+        const [_, contract] = await getContractInfo(GHOST_EXCHANGE_SCID);
         const stringkeys = contract?.stringkeys;
 
         setStringKeys(stringkeys);
@@ -90,6 +96,7 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
         history.replace(`/${selectedPair}`);
     }, [ selectedPair, history]);
 
+
     // Gets the balance of Boo tokens of an address for a given trading pair,
     // given by the pair's asset's SCID
     const getBooBalance = (lpAddress: string) => {
@@ -116,7 +123,7 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         async function updateGhostBalances() {
             if (!tradingPairs) return;
-            await getContractInfo();
+            await getGhostInfo();
             fetchBalances(tradingPairs);
         }
 
@@ -243,7 +250,7 @@ export const SwapProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         if (!xswd || !xswd.connection.fallback) return;
         if (tradingPairs == null) {
-            getContractInfo();
+            getGhostInfo();
         }
 
     }, [xswd, xswd?.connection.fallback]);
