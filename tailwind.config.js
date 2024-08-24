@@ -34,6 +34,14 @@ module.exports = {
               boxShadow: `8px 8px 0 0 ${color}`,
               transition: 'box-shadow 0.2s ease-in-out',
             },
+            '&:active': {
+              boxShadow: `4px 4px 0 0 ${color}`,
+              transition: 'box-shadow 0.2s ease-in-out',
+            },
+            '&:focus': {
+              boxShadow: `4px 4px 0 0 ${color}`,
+              transition: 'box-shadow 0.2s ease-in-out',
+            }
           };
           boxShadowUtilities[`.${e(`shadow-neu-active-${colorName}`)}`] = {
               boxShadow: `4px 4px 0 0 ${color}`,
@@ -48,6 +56,14 @@ module.exports = {
                 boxShadow: `8px 8px 0 0 ${color[shade]}`,
                 transition: 'box-shadow 0.2s ease-in-out',
               },
+              '&:active': {
+                boxShadow: `4px 4px 0 0 ${color}`,
+                transition: 'box-shadow 0.2s ease-in-out',
+              },
+              '&:focus': {
+                boxShadow: `4px 4px 0 0 ${color}`,
+                transition: 'box-shadow 0.2s ease-in-out',
+              }
             };
             boxShadowUtilities[`.${e(`shadow-neu-active-${colorName}-${shade}`)}`] = {
                 boxShadow: `4px 4px 0 0 ${color[shade]}`,
