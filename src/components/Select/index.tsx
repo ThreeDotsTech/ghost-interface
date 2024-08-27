@@ -26,7 +26,7 @@ const Select: React.FC<SelectProps> = ({
         py-2 sm:py-4
         px-2
         border-4 border-black
-        shadow-neu-black
+        shadow-neu-interactive-black
         transition-all duration-200
         ease-in-out
         disabled:bg-gray-200 disabled:text-gray-400

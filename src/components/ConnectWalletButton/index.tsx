@@ -16,7 +16,7 @@ const ConnectWalletButton: React.FC<ConnectWalletButtonProps> = ({
       };
 
     return (
-        <button className={'shadow-neu-black border-4 border-black bg-secondary font-semibold text-background text-black '+additionalClasses}
+        <button className={'shadow-neu-interactive-black border-4 border-black bg-secondary font-semibold text-background text-black '+additionalClasses}
             onClick={handleConnectWallet}
             >
             Connect Wallet
