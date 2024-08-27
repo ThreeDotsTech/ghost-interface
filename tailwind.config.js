@@ -27,7 +27,7 @@ module.exports = {
         const color = colors[colorName];
 
         if (typeof color === 'string') {
-          boxShadowUtilities[`.${e(`shadow-neu-${colorName}`)}`] = {
+          boxShadowUtilities[`.${e(`shadow-neu-interactive-${colorName}`)}`] = {
             boxShadow: `6px 6px 0 0 ${color}`,
             transition: 'box-shadow 0.2s ease-in-out',
             '&:hover': {
@@ -43,13 +43,12 @@ module.exports = {
               transition: 'box-shadow 0.2s ease-in-out',
             }
           };
-          boxShadowUtilities[`.${e(`shadow-neu-active-${colorName}`)}`] = {
-              boxShadow: `4px 4px 0 0 ${color}`,
-              transition: 'box-shadow 0.2s ease-in-out',
+          boxShadowUtilities[`.${e(`shadow-neu-${colorName}`)}`] = {
+            boxShadow: `6px 6px 0 0 ${color}`
           };
         } else {
           Object.keys(color).forEach(shade => {
-            boxShadowUtilities[`.${e(`shadow-neu-${colorName}-${shade}`)}`] = {
+            boxShadowUtilities[`.${e(`shadow-neu-interactive-${colorName}-${shade}`)}`] = {
               boxShadow: `6px 6px 0 0 ${color[shade]}`,
               transition: 'box-shadow 0.2s ease-in-out',
               '&:hover': {
@@ -65,9 +64,8 @@ module.exports = {
                 transition: 'box-shadow 0.2s ease-in-out',
               }
             };
-            boxShadowUtilities[`.${e(`shadow-neu-active-${colorName}-${shade}`)}`] = {
-                boxShadow: `4px 4px 0 0 ${color[shade]}`,
-                transition: 'box-shadow 0.2s ease-in-out',
+            boxShadowUtilities[`.${e(`shadow-neu-${colorName}-${shade}`)}`] = {
+              boxShadow: `6px 6px 0 0 ${color[shade]}`
             };
           });
         }

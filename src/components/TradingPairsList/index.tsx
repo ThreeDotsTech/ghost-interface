@@ -37,7 +37,7 @@ const TradingPairsList: React.FC<TradingPairsListProps> = () => {
           connectionType === 'XSWD' ? 
           <li
             key={"add-pair"}
-            className="ml-4 cursor-pointer border-y-4 border-l-4 pl-6 py-3 rounded-l-xl border-accent shadow-neu-accent text-black font-semibold text-lg"
+            className="ml-4 cursor-pointer border-y-4 border-l-4 pl-6 py-3 rounded-l-xl border-accent shadow-neu-interactive-accent text-black font-semibold text-lg"
             title={"Create pair"}
             onClick={handleCreatePairClick}
           >
