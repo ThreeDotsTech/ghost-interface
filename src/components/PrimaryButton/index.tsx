@@ -17,11 +17,9 @@ const PrimaryButton: React.FC<PrimaryButtonProps> = ({
         px-4 py-2
         bg-primary text-white
         border-4 border-black
-        shadow-neu-black
+        shadow-neu-interactive-black
         transition-all duration-200
         ease-in-out
-        hover:shadow-neu-hover
-        active:shadow-neu-active
         disabled:bg-gray-400 disabled:text-black disabled:hover:cursor-wait
     `;
 

@@ -25,7 +25,7 @@ const TradingPairListButton: React.FC<TradingPairListButtonProps> = ({
   const displayName = tradingPair.name || tradingPair.key;
 
   return (
-    <li className="ml-4 border-l-4 border-y-4 rounded-l-xl border-black shadow-neu-black transition-all duration-200 flex justify-between items-stretch overflow-hidden font-semibold text-lg">
+    <li className="ml-4 border-l-4 border-y-4 rounded-l-xl border-black shadow-neu-interactive-black transition-all duration-200 flex justify-between items-stretch overflow-hidden font-semibold text-lg">
       {selectedPair === tradingPair.key && connectionType === 'XSWD' && (
         <button
           className="p-1 bg-primary text-white border-black border-r-4 shadow hover:bg-accent transition-colors duration-200 ease-in-out"
@@ -37,8 +37,8 @@ const TradingPairListButton: React.FC<TradingPairListButtonProps> = ({
       <a
         className={`block cursor-pointer pl-6 py-3 truncate flex-1 ${
           selectedPair === tradingPair.key
-            ? 'text-white bg-primary shadow-neu-active-black'
-            : 'text-black bg-white hover:bg-gray-200 hover:shadow-neu-hover-black'
+            ? 'text-white bg-primary shadow-neu-interactive-active-black'
+            : 'text-black bg-white hover:bg-gray-200'
         }`}
         onClick={() => {
           setSelectedPair(tradingPair.key);

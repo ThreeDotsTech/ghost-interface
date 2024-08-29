@@ -48,7 +48,7 @@ const WalletConnectModalContent: React.FC<{ hideModal: () => void }> = ({ hideMo
     }, [xswd, subscriptions]);
 
     return (
-        <div className="flex flex-col items-center justify-center p-6 bg-white border-4 border-black shadow-neu-black w-96 ">
+        <div className="flex flex-col items-center justify-center p-6 bg-white border-4 border-black shadow-neu w-96 ">
             <h1 className="text-xl font-bold mb-5">{statusMessage}</h1>
             <Spinner succeed={succeed} />
             <h1 className="text-xl font-semibold mb-1">XSWD Approval</h1>
