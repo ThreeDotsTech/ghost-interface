@@ -3,8 +3,8 @@
   "private": false,
   "version": "1.2.0",
   "scripts": {
-    "start": "webpack serve --config webpack/webpack.config.js --open",
-    "build": "tsc && vite build",
+    "start": "webpack serve --config webpack/webpack.dev.config.js --open",
+    "build": "webpack --config webpack/webpack.prod.config.js",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "postinstall": "patch-package",
     "preview": "vite preview"
@@ -26,10 +26,12 @@
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "babel-loader": "^9.2.1",
+    "clean-webpack-plugin": "^4.0.0",
     "css-loader": "^7.1.2",
     "eslint": "^8.45.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
+    "eslint-webpack-plugin": "^4.2.0",
     "html-webpack-plugin": "^5.6.0",
     "patch-package": "^8.0.0",
     "postcss": "^8.4.38",
@@ -38,9 +40,11 @@
     "postinstall-postinstall": "^2.1.0",
     "style-loader": "^4.0.0",
     "tailwindcss": "^3.4.3",
+    "terser-webpack-plugin": "^5.3.10",
     "typescript": "^5.0.2",
     "webpack": "^5.94.0",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.1.0"
+    "webpack-dev-server": "^5.1.0",
+    "webpack-merge": "^6.0.1"
   }
 }
