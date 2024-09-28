@@ -11,6 +11,25 @@ module.exports = merge( commonWebpackConfig, {
     optimization: {
         minimizer: [ new TerserJSPlugin({
             extractComments: false
-        }) ]
+        })],
+        splitChunks: {
+            chunks: 'all',
+            minSize: 1,
+            maxSize: 15000,
+            enforceSizeThreshold: 15000,
+            cacheGroups: {
+              defaultVendors: {
+                test: /[\\/]node_modules[\\/]/,
+                priority: -10,
+                reuseExistingChunk: false,
+                minChunks: 1,
+              },
+              default: {
+                minChunks: 1,
+                priority: -20,
+                reuseExistingChunk: false,
+              },
+            },
+          }
     },
 })
