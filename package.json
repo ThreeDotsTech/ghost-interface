@@ -7,8 +7,7 @@
     "build:prod-tela": "webpack --config webpack.prod-tela.config.js",
     "build:prod": "webpack --config webpack.prod.config.js",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "postinstall": "patch-package",
-    "preview": "vite preview"
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "dero-xswd-api": "0.8.3-d",
