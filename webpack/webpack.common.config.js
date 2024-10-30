@@ -8,6 +8,12 @@ module.exports = {
     entry: path.resolve(__dirname, '..', './src/main.tsx'),
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],
+        alias: {
+            "react": "preact/compat",
+            "react-dom/test-utils": "preact/test-utils",
+            "react-dom": "preact/compat",
+            "react/jsx-runtime": "preact/jsx-runtime"
+        },
     },
     module: {
         rules: [
@@ -37,7 +43,7 @@ module.exports = {
     output: {
         path: path.resolve(__dirname, '..', 'dist'),
         filename: '[name].bundle.js',
-        publicPath: '/',
+        publicPath: '',
         assetModuleFilename: '[hash][ext]',
         clean: true
     },
